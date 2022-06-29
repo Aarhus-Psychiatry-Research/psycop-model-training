@@ -74,6 +74,9 @@ def impute(
 
 
 def generate_predictions(train_y, train_X, val_X):
+    train_X["pred_sex_female"] = train_X["pred_sex_female"].astype(bool)
+    val_X["pred_sex_female"] = val_X["pred_sex_female"].astype(bool)
+
     msg.info("Fitting model")
     model = XGBClassifier(n_jobs=58, missing=np.nan)
     model.fit(train_X, train_y, verbose=True)
@@ -81,7 +84,7 @@ def generate_predictions(train_y, train_X, val_X):
 
     msg.info("Generating predictions")
 
-    pred_probs = model.predict_proba(val_X)
+    pred_probs = model.predict_proba(val_X)[:, 1]
     preds = model.predict(val_X)
     return preds, pred_probs, model
 

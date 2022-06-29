@@ -28,8 +28,8 @@ def main(cfg):
         # Flatten nested dict to support wandb filtering
         run.config.update(flatten_nested_dict(cfg, sep="."))
 
-    OUTCOME_COL_NAME = f"t2d_within_{cfg.training.lookahead_days}_days_max_fallback_0"
-    OUTCOME_TIMESTAMP_COL_NAME = f"timestamp_{OUTCOME_COL_NAME}"
+    OUTCOME_COL_NAME = f"outc_dichotomous_t2d_within_{cfg.training.lookahead_days}_days_max_fallback_0"
+    OUTCOME_TIMESTAMP_COL_NAME = f"timestamp_first_diabetes_any"
 
     PREDICTED_OUTCOME_COL_NAME = f"pred_{OUTCOME_COL_NAME}"
     PREDICTED_PROBABILITY_COL_NAME = f"pred_prob_{OUTCOME_COL_NAME}"
@@ -76,26 +76,27 @@ def main(cfg):
         drop_if_any_diabetes_before_date=cfg.post_processing.val.drop_if_any_diabetes_before_date,
     )
 
+    # keep only cols that start with pred_
+    X_train = X_train.loc[:, X_train.columns.str.startswith("pred_")]
+    X_val = X_val.loc[:, X_val.columns.str.startswith("pred_")]
+
     # Consider moving impute to post_process
     if cfg.post_processing.impute_all:
         train_X_imputed, val_X_imputed = impute(train_X=X_train, val_X=X_val)
     else:
         train_X_imputed, val_X_imputed = X_train, X_val
-
+    
     y_preds, y_probas, model = generate_predictions(
         y_train,
         train_X_imputed,
         val_X_imputed,
     )
 
-    # keep only cols that start with pred_
-    X_train = X_train.loc[:, X_train.columns.str.startswith("pred_")]
-    X_val = X_val.loc[:, X_val.columns.str.startswith("pred_")]
+
+    msg.info(({"roc_auc_unweighted": round(roc_auc_score(y_val, y_probas), 3)}))
 
     # Evaluation
     if cfg.evaluation.wandb:
-        run.log({"roc_auc_unweighted": round(roc_auc_score(y_val, y_probas[:, 1]), 3)})
-
         wandb.sklearn.plot_classifier(
             model,
             X_train=X_train,
@@ -113,6 +114,8 @@ def main(cfg):
     eval_df[OUTCOME_COL_NAME] = y_val_eval
     eval_df[PREDICTED_OUTCOME_COL_NAME] = y_preds
     eval_df[PREDICTED_PROBABILITY_COL_NAME] = y_probas
+
+    
 
     if cfg.evaluation.wandb:
         log_tpr_by_time_to_event(
