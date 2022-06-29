@@ -1,11 +1,11 @@
 from pathlib import Path
 
 import hydra
+import wandb
 from sklearn.metrics import roc_auc_score
 from wasabi import Printer
 
 import psycopt2d.features.post_process as post_process
-import wandb
 from psycopt2d.features.load_features import load_dataset
 from psycopt2d.utils import (
     calculate_performance_metrics,
@@ -29,14 +29,12 @@ def main(cfg):
         run.config.update(flatten_nested_dict(cfg, sep="."))
 
     OUTCOME_COL_NAME = f"t2d_within_{cfg.training.lookahead_days}_days_max_fallback_0"
-    PREDICTED_OUTCOME_COL_NAME = f"pred_{OUTCOME_COL_NAME}"
     OUTCOME_TIMESTAMP_COL_NAME = f"timestamp_{OUTCOME_COL_NAME}"
+
+    PREDICTED_OUTCOME_COL_NAME = f"pred_{OUTCOME_COL_NAME}"
     PREDICTED_PROBABILITY_COL_NAME = f"pred_prob_{OUTCOME_COL_NAME}"
 
-    if cfg.post_processing.load_all:
-        n_to_load = None
-    else:
-        n_to_load = 5_000
+    n_to_load = cfg.post_processing.n_to_load
 
     cols_to_drop_before_training = cfg.training.cols_to_drop_before_training + [
         OUTCOME_TIMESTAMP_COL_NAME,
@@ -89,6 +87,10 @@ def main(cfg):
         train_X_imputed,
         val_X_imputed,
     )
+
+    # keep only cols that start with pred_
+    X_train = X_train.loc[:, X_train.columns.str.startswith("pred_")]
+    X_val = X_val.loc[:, X_val.columns.str.startswith("pred_")]
 
     # Evaluation
     if cfg.evaluation.wandb:
