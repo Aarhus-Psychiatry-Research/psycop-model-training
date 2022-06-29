@@ -1,5 +1,5 @@
 post_processing:
-  load_all: False
+  n_to_load: 5000
   impute_all: False
   force_all_binary: False
   train:
