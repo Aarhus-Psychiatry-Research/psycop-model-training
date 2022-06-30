@@ -46,16 +46,7 @@ def main(cfg):
 
 
 def pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe) -> Tuple[Series, Series]:
-    """Loads dataset and fits a model on the pre-defined split.
 
-    Args:
-        cfg (_type_): _description_
-        OUTCOME_COL_NAME (_type_): _description_
-
-    Returns:
-        Tuple(Series, Series): Two series: True labels and predicted labels for the validation set.
-    """
-    # Train set
     train = load_dataset(
         split_names="train",
     )
