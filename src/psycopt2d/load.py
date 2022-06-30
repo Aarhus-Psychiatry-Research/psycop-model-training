@@ -21,5 +21,7 @@ def load_dataset(
         format_timestamp_cols_to_datetime=False,
     )
 
+    dataset["pred_sex_female"] = dataset["pred_sex_female"].astype("bool")
+
     msg.good(f"{split_names}: Returning!")
     return dataset
