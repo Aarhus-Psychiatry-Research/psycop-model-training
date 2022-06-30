@@ -4,11 +4,11 @@ post_processing:
   force_all_binary: False
   train:
     drop_if_any_diabetes_before_date: 2013-01-01
-    min_lookahead_days: 365 # Drop all prediction times where (max timestamp in the dataset) - (current timestamp) is less than min_lookahead_days
+    min_lookahead_days: 0 # Drop all prediction times where (max timestamp in the dataset) - (current timestamp) is less than min_lookahead_days
     min_lookbehind_days: 365 # Drop all prediction times where (current timestamp) - (min timestamp in the dataset) is less than min_lookbehind_days
   val:
     drop_if_any_diabetes_before_date: 2013-01-01
-    min_lookahead_days: 365 # Drop all prediction times where (max timestamp in the dataset) - (current timestamp) is less than min_lookahead_days
+    min_lookahead_days: 0 # Drop all prediction times where (max timestamp in the dataset) - (current timestamp) is less than min_lookahead_days
     min_lookbehind_days: 365 # Drop all prediction times where (current timestamp) - (min timestamp in the dataset) is less than min_lookbehind_days
   washin_days: 0
 
