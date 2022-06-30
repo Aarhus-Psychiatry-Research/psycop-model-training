@@ -2,13 +2,12 @@ from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
+import wandb
 from matplotlib import pyplot as plt
 from psycopmlutils.model_performance import ModelPerformance
 from sklearn.impute import SimpleImputer
 from wasabi import msg
 from xgboost import XGBClassifier
-
-import wandb
 
 
 def flatten_nested_dict(dict: Dict, sep: str = ".") -> Dict:
@@ -85,9 +84,10 @@ def generate_predictions(train_y, train_X, val_X):
 
     msg.info("Generating predictions")
 
-    pred_probs = model.predict_proba(val_X)[:, 1]
-    preds = model.predict(val_X)
-    return preds, pred_probs, model
+    y_train_pred_probs = model.predict_proba(train_X)[:, 1]
+    y_val_probas = model.predict_proba(val_X)[:, 1]
+    y_val_preds = model.predict(val_X)
+    return y_val_preds, y_val_probas, model, y_train_pred_probs
 
 
 def round_floats_to_edge(series: pd.Series, bins: List[float]):
