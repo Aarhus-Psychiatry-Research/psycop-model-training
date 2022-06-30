@@ -58,7 +58,7 @@ def main(cfg):
         X_val=X_val,
     )
 
-    msg.info(f"Performance on train: {roc_auc_score(y_val, y_train_pred_probs)}")
+    msg.info(f"Performance on train: {roc_auc_score(y_train, y_train_pred_probs)}")
     msg.info(f"Performance on val: {roc_auc_score(y_val, y_val_probas)}")
 
 
