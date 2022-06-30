@@ -73,21 +73,20 @@ def impute(
     return train_X_imputed, val_X_imputed
 
 
-def generate_predictions(train_y, train_X, val_X):
-    train_X["pred_sex_female"] = train_X["pred_sex_female"].astype(bool)
-    val_X["pred_sex_female"] = val_X["pred_sex_female"].astype(bool)
-
+def generate_predictions(y_train, X_train, X_val):
     msg.info("Fitting model")
-    model = XGBClassifier(n_jobs=58, missing=np.nan)
-    model.fit(train_X, train_y, verbose=True)
+
+    model = XGBClassifier(missing=np.nan)
+    model.fit(X_train, y_train, verbose=True)
+
     msg.good("Model fit!")
 
     msg.info("Generating predictions")
 
-    y_train_pred_probs = model.predict_proba(train_X)[:, 1]
-    y_val_probas = model.predict_proba(val_X)[:, 1]
-    y_val_preds = model.predict(val_X)
-    return y_val_preds, y_val_probas, model, y_train_pred_probs
+    y_train_pred_probs = model.predict_proba(X_train)[:, 1]
+    y_val_probas = model.predict_proba(X_val)[:, 1]
+
+    return y_val_probas, model, y_train_pred_probs
 
 
 def round_floats_to_edge(series: pd.Series, bins: List[float]):

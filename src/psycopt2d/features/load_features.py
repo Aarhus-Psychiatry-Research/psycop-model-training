@@ -27,34 +27,6 @@ def load_dataset(
         format_timestamp_cols_to_datetime=False,
     )
 
-    # Add "any diabetes" column for wash-in
-    timestamp_any_diabetes = sql_load(
-        query="SELECT * FROM [fct].[psycop_t2d_first_diabetes_any]",
-        format_timestamp_cols_to_datetime=False,
-    )[["dw_ek_borger", "datotid_first_diabetes_any"]]
-
-    timestamp_any_diabetes = timestamp_any_diabetes.rename(
-        columns={"datotid_first_diabetes_any": "timestamp_first_diabetes_any"},
-    )
-
-    df_combined = df_combined.merge(
-        timestamp_any_diabetes,
-        on="dw_ek_borger",
-        how="left",
-    )
-
-    # Convert all timestamp cols to datetime64[ns]
-    timestamp_colnames = [col for col in df_combined.columns if "timestamp" in col]
-
-    for colname in timestamp_colnames:
-        if df_combined[colname].dtype != "datetime64[ns]":
-            # Convert all 0s in colname to NaT
-            df_combined[colname] = df_combined[colname].apply(
-                lambda x: pd.NaT if x == "0" else x,
-            )
-
-            df_combined[colname] = pd.to_datetime(df_combined[colname])
-
     # Convert sex to bool
     df_combined["pred_sex_female"] = df_combined["pred_sex_female"].astype("bool")
 
