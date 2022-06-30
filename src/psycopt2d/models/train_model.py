@@ -1,11 +1,11 @@
 from pathlib import Path
 
 import hydra
+import wandb
 from sklearn.metrics import roc_auc_score
 from wasabi import Printer
 
 import psycopt2d.features.post_process as post_process
-import wandb
 from psycopt2d.features.load_features import load_dataset
 from psycopt2d.utils import (
     calculate_performance_metrics,
@@ -35,8 +35,6 @@ def main(cfg):
     PREDICTED_OUTCOME_COL_NAME = f"pred_{OUTCOME_COL_NAME}"
     PREDICTED_PROBABILITY_COL_NAME = f"pred_prob_{OUTCOME_COL_NAME}"
 
-    n_to_load = cfg.post_processing.n_to_load
-
     cols_to_drop_before_training = cfg.training.cols_to_drop_before_training + [
         OUTCOME_TIMESTAMP_COL_NAME,
     ]
@@ -44,7 +42,7 @@ def main(cfg):
     # Val set
     X_val, y_val = load_dataset(
         split_name="val",
-        n_to_load=n_to_load,
+        n_to_load=cfg.post_processing.n_to_load,
         outcome_col_name=OUTCOME_COL_NAME,
     )
 
@@ -63,7 +61,7 @@ def main(cfg):
     X_train, y_train = load_dataset(
         split_name="train",
         outcome_col_name=OUTCOME_COL_NAME,
-        n_to_load=n_to_load,
+        n_to_load=cfg.post_processing.n_to_load,
     )
 
     (X_train, y_train, X_train_eval, y_train_eval) = post_process.combined(
@@ -87,13 +85,14 @@ def main(cfg):
     else:
         train_X_imputed, val_X_imputed = X_train, X_val
 
-    y_preds, y_probas, model = generate_predictions(
-        y_train,
-        train_X_imputed,
-        val_X_imputed,
+    y_val_preds, y_val_probas, model, y_train_pred_probs = generate_predictions(
+        train_y=y_train,
+        train_X=train_X_imputed,
+        val_X=val_X_imputed,
     )
 
-    msg.info(f"Performance on val: {roc_auc_score(y_val, y_probas)}")
+    msg.info(f"Performance on train: {roc_auc_score(y_val, y_train_pred_probs)}")
+    msg.info(f"Performance on val: {roc_auc_score(y_val, y_val_probas)}")
 
     # Evaluation
     if cfg.evaluation.wandb:
@@ -103,8 +102,8 @@ def main(cfg):
             X_test=X_val,
             y_train=y_train,
             y_test=y_val,
-            y_pred=y_preds,
-            y_probas=y_probas,
+            y_pred=y_val_preds,
+            y_probas=y_val_probas,
             labels=[0, 1],
             model_name="XGB",
             feature_names=X_train.columns,
@@ -112,8 +111,8 @@ def main(cfg):
 
     eval_df = X_val_eval
     eval_df[OUTCOME_COL_NAME] = y_val_eval
-    eval_df[PREDICTED_OUTCOME_COL_NAME] = y_preds
-    eval_df[PREDICTED_PROBABILITY_COL_NAME] = y_probas
+    eval_df[PREDICTED_OUTCOME_COL_NAME] = y_val_preds
+    eval_df[PREDICTED_PROBABILITY_COL_NAME] = y_val_probas
 
     if cfg.evaluation.wandb:
         log_tpr_by_time_to_event(
