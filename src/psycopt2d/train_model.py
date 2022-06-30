@@ -10,7 +10,7 @@ Features:
 """
 
 from pathlib import Path
-from typing import Iterable, Optional, Tuple
+from typing import Tuple
 
 import hydra
 import numpy as np
@@ -18,12 +18,9 @@ import numpy as np
 # import wandb
 from pandas import Series
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
-from wandb.sdk import wandb_run
 from xgboost import XGBClassifier
 
-from psycopt2d.feature_transformers import ConvertToBoolean, DateTimeConverter
 from psycopt2d.load import load_dataset
 
 # from psycopt2d.models import model_catalogue
@@ -33,68 +30,10 @@ CONFIG_PATH = Path(__file__).parent / "config"
 TRAINING_COL_NAME_PREFIX = "pred_"
 
 
-def create_preprocessing_pipelines(cfg):
-    """create preprocessing pipeline based on config."""
-    steps = []
-    dtconverter = DateTimeConverter(convert_to=cfg.preprocessing.convert_datetimes_to)
-    steps.append(("DateTimeConverter", dtconverter))
-
-    if cfg.preprocessing.convert_to_boolean:
-        steps.append(("ConvertToBoolean", ConvertToBoolean()))
-
-    # steps.append(("ConvertToNumpyArray", ConvertToNumpyArray()))
-    return Pipeline(steps)
-
-
 def create_model(cfg):
 
     mdl = XGBClassifier(missing=np.nan, verbose=True)
     return mdl
-
-
-def evaluate(
-    X,
-    y: Iterable[int],
-    y_hat_prob: Iterable[float],
-    wandb_run: Optional[wandb_run.Run],
-):
-    if wandb_run:
-        wandb_run.log({"roc_auc_unweighted": round(roc_auc_score(y, y_hat_prob), 3)})
-    else:
-        print(f"AUC is: {roc_auc_score(y, y_hat_prob)}")
-    # wandb.sklearn.plot_classifier(
-    #     model,
-    #     X_test=X,
-    #     y_train=y_train,
-    #     y_test=y_val,
-    #     y_pred=y_preds,
-    #     y_probas=y_probas,
-    #     labels=[0, 1],
-    #     model_name=cfg.training.model_name,
-    #     feature_names=X_train.columns,
-    # )
-    # eval_df = X_val_eval
-    # eval_df[OUTCOME_COL_NAME] = y_val_eval
-    # eval_df[PREDICTED_OUTCOME_COL_NAME] = y_preds
-    # eval_df[PREDICTED_PROBABILITY_COL_NAME] = y_probas
-
-    # if cfg.evaluation.wandb:
-    #     log_tpr_by_time_to_event(
-    #         eval_df_combined=eval_df,
-    #         outcome_col_name=OUTCOME_COL_NAME,
-    #         predicted_outcome_col_name=PREDICTED_OUTCOME_COL_NAME,
-    #         outcome_timestamp_col_name=OUTCOME_TIMESTAMP_COL_NAME,
-    #         prediction_timestamp_col_name="timestamp",
-    #         bins=[0, 1, 7, 14, 28, 182, 365, 730, 1825],
-    #     )
-    #     performance_metrics = calculate_performance_metrics(
-    #         eval_df,
-    #         outcome_col_name=OUTCOME_COL_NAME,
-    #         prediction_probabilities_col_name=PREDICTED_PROBABILITY_COL_NAME,
-    #         id_col_name="dw_ek_borger",
-    #     )
-
-    #     run.log(performance_metrics)
 
 
 @hydra.main(
@@ -152,59 +91,8 @@ def pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe) -> Tuple[Series, 
     y_val_hat = pipe.predict(X_val)
 
     print(f"Performance on train: {roc_auc_score(y_train, y_train_hat)}")
-
+    print(f"Performance on val: {roc_auc_score(y_val, y_val_hat)}")
     return y_val, y_val_hat
-
-
-def cross_validated_performance(cfg, OUTCOME_COL_NAME, pipe):
-    """Loads train and val, concatenates them and uses them for cross-
-    validation.
-
-    Args:
-        cfg (_type_): _description_
-        OUTCOME_COL_NAME (_type_): _description_
-
-    Returns:
-        Tuple(Series, Series): Two series: True labels and predicted labels for the validation set.
-    """
-    dataset = load_dataset(
-        split_names=["train", "val"],
-        n_training_samples=cfg.data.n_training_samples,
-        drop_patient_if_outcome_before_date=cfg.data.drop_patient_if_outcome_before_date,
-        min_lookahead_days=cfg.data.min_lookahead_days,
-    )
-
-    # extract training data
-    X = dataset[
-        [c for c in dataset.columns if c.startswith(cfg.data.pred_col_name_prefix)]
-    ]
-    y = dataset[[OUTCOME_COL_NAME]]
-
-    # create stratified groups kfold
-    folds = StratifiedGroupKFold(n_splits=cfg.training.n_splits).split(
-        X,
-        y,
-        dataset["dw_ek_borger"],
-    )
-
-    # perform CV, obtaining out of fold predictions
-    dataset["oof_y_hat"] = np.nan
-    for train_idxs, val_idxs in folds:
-        X_, y_ = X.loc[train_idxs], y.loc[train_idxs]
-        pipe.fit(X_, y_)
-
-        y_hat = pipe.predict(X_)
-
-        dataset["oof_y_hat"].loc[val_idxs] = pipe.predict(X.loc[val_idxs])
-
-        out_of_fold_y = dataset[[OUTCOME_COL_NAME]].loc[val_idxs]
-        out_of_fold_y_hat = dataset["oof_y_hat"].loc[val_idxs]
-        print(f"Within-fold performance: {roc_auc_score(y_,y_hat)}")
-        print(
-            f"Out-of-fold performance: {roc_auc_score(out_of_fold_y, out_of_fold_y_hat)}",
-        )
-
-    return y, dataset["oof_y_hat"]
 
 
 if __name__ == "__main__":
