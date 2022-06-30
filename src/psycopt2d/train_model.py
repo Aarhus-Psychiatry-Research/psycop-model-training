@@ -47,12 +47,7 @@ def create_preprocessing_pipelines(cfg):
 
 
 def create_model(cfg):
-    # model_config_dict = model_catalogue.get(cfg.model.model_name)
 
-    # model_args = model_config_dict["static_hyperparameters"]
-    # # training_arguments = getattr(cfg.model, cfg.model.model_name)
-    # # model_args.update(training_arguments)
-    # mdl = model_config_dict["model"](**model_args)
     mdl = XGBClassifier(missing=np.nan, verbose=True)
     return mdl
 
@@ -107,41 +102,17 @@ def evaluate(
     config_name="train_config",
 )
 def main(cfg):
-    # if cfg.evaluation.wandb:
-    #     run = wandb.init(
-    #         project=cfg.project,
-    #         reinit=True,
-    #         config=flatten_nested_dict(cfg, sep="."),
-    #     )
-    # else:
-    #     run = None
 
     OUTCOME_COL_NAME = (
         f"outc_dichotomous_t2d_within_{cfg.data.lookahead_days}_days_max_fallback_0"
     )
 
-    # preprocessing_pipe = create_preprocessing_pipelines(cfg)
     mdl = create_model(cfg)
     pipe = Pipeline([("mdl", mdl)])  # ("preprocessing", preprocessing_pipe),
 
-    if cfg.training.n_splits is not None:
-        y, y_hat_prob = cross_validated_performance(cfg, OUTCOME_COL_NAME, pipe)
-    else:
-        y, y_hat_prob = pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe)
+    y, y_hat_prob = pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe)
 
     print(f"Performance on val: {roc_auc_score(y, y_hat_prob)}")
-
-    # # Calculate performance metrics and log to wandb_run
-    # evaluate(
-    #     X="",
-    #     y=y,
-    #     y_hat_prob=y_hat_prob,
-    #     wandb_run=run,  # noqa
-    # )
-
-    # # finish run
-    # if cfg.evaluation.wandb:
-    #     run.finish()  # noqa
 
 
 def pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe) -> Tuple[Series, Series]:
