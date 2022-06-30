@@ -56,7 +56,7 @@ def load_dataset(
             df_combined[colname] = pd.to_datetime(df_combined[colname])
 
     # Convert sex to bool
-    df_combined['pred_sex_female'] = df_combined['pred_sex_female'].astype('bool')
+    df_combined["pred_sex_female"] = df_combined["pred_sex_female"].astype("bool")
 
     _X = df_combined.drop(outcome_col_name, axis=1)
     _y = df_combined[outcome_col_name]

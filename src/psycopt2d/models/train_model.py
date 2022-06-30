@@ -1,11 +1,11 @@
 from pathlib import Path
 
 import hydra
-import wandb
 from sklearn.metrics import roc_auc_score
 from wasabi import Printer
 
 import psycopt2d.features.post_process as post_process
+import wandb
 from psycopt2d.features.load_features import load_dataset
 from psycopt2d.utils import (
     calculate_performance_metrics,
@@ -28,9 +28,10 @@ def main(cfg):
         # Flatten nested dict to support wandb filtering
         run.config.update(flatten_nested_dict(cfg, sep="."))
 
-    OUTCOME_COL_NAME = f"outc_dichotomous_t2d_within_{cfg.training.lookahead_days}_days_max_fallback_0"
-    OUTCOME_TIMESTAMP_COL_NAME = f"timestamp_first_diabetes_any"
-
+    OUTCOME_COL_NAME = (
+        f"outc_dichotomous_t2d_within_{cfg.training.lookahead_days}_days_max_fallback_0"
+    )
+    OUTCOME_TIMESTAMP_COL_NAME = "timestamp_first_diabetes_any"
     PREDICTED_OUTCOME_COL_NAME = f"pred_{OUTCOME_COL_NAME}"
     PREDICTED_PROBABILITY_COL_NAME = f"pred_prob_{OUTCOME_COL_NAME}"
 
@@ -85,15 +86,14 @@ def main(cfg):
         train_X_imputed, val_X_imputed = impute(train_X=X_train, val_X=X_val)
     else:
         train_X_imputed, val_X_imputed = X_train, X_val
-    
+
     y_preds, y_probas, model = generate_predictions(
         y_train,
         train_X_imputed,
         val_X_imputed,
     )
 
-
-    msg.info(({"roc_auc_unweighted": round(roc_auc_score(y_val, y_probas), 3)}))
+    msg.info(f"Performance on val: {roc_auc_score(y_val, y_probas)}")
 
     # Evaluation
     if cfg.evaluation.wandb:
@@ -114,8 +114,6 @@ def main(cfg):
     eval_df[OUTCOME_COL_NAME] = y_val_eval
     eval_df[PREDICTED_OUTCOME_COL_NAME] = y_preds
     eval_df[PREDICTED_PROBABILITY_COL_NAME] = y_probas
-
-    
 
     if cfg.evaluation.wandb:
         log_tpr_by_time_to_event(
