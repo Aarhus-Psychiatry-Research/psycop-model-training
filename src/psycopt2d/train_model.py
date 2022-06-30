@@ -63,6 +63,7 @@ def pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe) -> Tuple[Series, 
         [c for c in train.columns if c.startswith(cfg.data.pred_col_name_prefix)]
     ]
     y_train = train[[OUTCOME_COL_NAME]]
+    print(f"Train columns: {X_train.columns}")
 
     # Val set
     val = load_dataset(
@@ -70,6 +71,7 @@ def pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe) -> Tuple[Series, 
     )
     X_val = val[[c for c in val.columns if c.startswith(cfg.data.pred_col_name_prefix)]]
     y_val = val[[OUTCOME_COL_NAME]]
+    print(f"Val columns: {X_val.columns}")
 
     pipe.fit(X_train, y_train, verbose=True)
     y_train_hat = pipe.predict(X_train)
