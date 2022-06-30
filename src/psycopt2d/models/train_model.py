@@ -1,11 +1,11 @@
 from pathlib import Path
 
 import hydra
-import wandb
 from sklearn.metrics import roc_auc_score
 from wasabi import Printer
 
 import psycopt2d.features.post_process as post_process
+import wandb
 from psycopt2d.features.load_features import load_dataset
 from psycopt2d.utils import (
     calculate_performance_metrics,
@@ -91,7 +91,7 @@ def main(cfg):
         val_X=val_X_imputed,
     )
 
-    msg.info(f"Performance on train: {roc_auc_score(y_val, y_train_pred_probs)}")
+    msg.info(f"Performance on train: {roc_auc_score(y_train, y_train_pred_probs)}")
     msg.info(f"Performance on val: {roc_auc_score(y_val, y_val_probas)}")
 
     # Evaluation
