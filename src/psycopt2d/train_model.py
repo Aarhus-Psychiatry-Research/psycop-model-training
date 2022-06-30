@@ -18,7 +18,6 @@ import numpy as np
 # import wandb
 from pandas import Series
 from sklearn.metrics import roc_auc_score
-from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 
 from psycopt2d.load import load_dataset
@@ -30,12 +29,6 @@ CONFIG_PATH = Path(__file__).parent / "config"
 TRAINING_COL_NAME_PREFIX = "pred_"
 
 
-def create_model(cfg):
-
-    mdl = XGBClassifier(missing=np.nan, verbose=True)
-    return mdl
-
-
 @hydra.main(
     config_path=CONFIG_PATH,
     config_name="train_config",
@@ -45,9 +38,7 @@ def main(cfg):
     OUTCOME_COL_NAME = (
         f"outc_dichotomous_t2d_within_{cfg.data.lookahead_days}_days_max_fallback_0"
     )
-
-    mdl = create_model(cfg)
-    pipe = Pipeline([("mdl", mdl)])  # ("preprocessing", preprocessing_pipe),
+    pipe = XGBClassifier(missing=np.nan)
 
     y, y_hat_prob = pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe)
 
@@ -67,9 +58,6 @@ def pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe) -> Tuple[Series, 
     # Train set
     train = load_dataset(
         split_names="train",
-        n_training_samples=cfg.data.n_training_samples,
-        drop_patient_if_outcome_before_date=cfg.data.drop_patient_if_outcome_before_date,
-        min_lookahead_days=cfg.data.min_lookahead_days,
     )
     X_train = train[
         [c for c in train.columns if c.startswith(cfg.data.pred_col_name_prefix)]
@@ -79,14 +67,11 @@ def pre_defined_split_performance(cfg, OUTCOME_COL_NAME, pipe) -> Tuple[Series, 
     # Val set
     val = load_dataset(
         split_names="val",
-        n_training_samples=cfg.data.n_training_samples,
-        drop_patient_if_outcome_before_date=cfg.data.drop_patient_if_outcome_before_date,
-        min_lookahead_days=cfg.data.min_lookahead_days,
     )
     X_val = val[[c for c in val.columns if c.startswith(cfg.data.pred_col_name_prefix)]]
     y_val = val[[OUTCOME_COL_NAME]]
 
-    pipe.fit(X_train, y_train)
+    pipe.fit(X_train, y_train, verbose=True)
     y_train_hat = pipe.predict(X_train)
     y_val_hat = pipe.predict(X_val)
 
