@@ -36,7 +36,7 @@ def evaluate_model(
 
     # Tables
     ## Performance by threshold
-
+    print("Logging tables")
     performance_by_threshold_df = generate_performance_by_threshold_table(
         labels=y,
         pred_probs=y_hat_probs,
@@ -50,6 +50,7 @@ def evaluate_model(
     )
 
     # Figures
+    print("Generating figures")
     plots = {}
 
     ## Sensitivity by time to outcome
@@ -61,6 +62,7 @@ def evaluate_model(
 
     for i, threshold in enumerate(thresholds):
         log_title = f"{threshold_percentiles[i]}_sensitivity_by_time_to_outcome"
+        print(f"Generating {log_title}")
 
         plots.update(
             {
@@ -76,4 +78,5 @@ def evaluate_model(
 
     ## Log all the figures to wandb
     for chart_name, chart_obj in plots.items():
+        print(f"Logging {chart_name}")
         log_altair_to_wandb(chart=chart_obj, chart_name=chart_name, run=run)

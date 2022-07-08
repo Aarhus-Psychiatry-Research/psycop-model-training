@@ -1,5 +1,4 @@
 """Training script for training a single model for predicting t2d."""
-import os
 from pathlib import Path
 from typing import List, Tuple
 
@@ -21,9 +20,6 @@ from psycopt2d.utils import flatten_nested_dict
 
 CONFIG_PATH = Path(__file__).parent / "config"
 TRAINING_COL_NAME_PREFIX = "pred_"
-
-# Handle wandb not playing nice with joblib
-os.environ["WANDB_START_METHOD"] = "thread"
 
 
 def create_preprocessing_pipeline(cfg):
@@ -154,6 +150,7 @@ def main(cfg):
         reinit=True,
         config=flatten_nested_dict(cfg, sep="."),
         mode=cfg.project.wandb_mode,
+        settings=wandb.Settings(start_method="thread"),
     )
 
     # load dataset
