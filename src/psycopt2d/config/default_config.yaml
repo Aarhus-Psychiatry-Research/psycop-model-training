@@ -1,7 +1,7 @@
 # @package _global_
 defaults:
   - project: default_project
-  - data: sql_50k
+  - data: sql_full
   - preprocessing: default_preprocessing
   - training: default_training
   - evaluation: default_evaluation
