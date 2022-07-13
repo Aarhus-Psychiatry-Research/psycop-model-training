@@ -147,16 +147,18 @@ def stratified_cross_validation(
 def main(cfg):
     run = wandb.init(
         project=cfg.project.name,
-        reinit=True,
+        reinit=False,
         config=flatten_nested_dict(cfg, sep="."),
         mode=cfg.project.wandb_mode,
         settings=wandb.Settings(start_method="thread"),
     )
 
-    # load dataset
+    wandb.require("service")
+
+    # Load dataset
     train, val = load_dataset_from_config(cfg)
 
-    # creating pipeline
+    # Creating pipeline
     steps = []
     preprocessing_pipe = create_preprocessing_pipeline(cfg)
     if len(preprocessing_pipe.steps) != 0:
@@ -183,8 +185,10 @@ def main(cfg):
         y_train = train[OUTCOME_COL_NAME]
         X_val = val[TRAIN_COL_NAMES]
 
+        print("Fitting model!")
         pipe.fit(X_train, y_train)
 
+        print("Generating predictions!")
         y_train_hat_prob = pipe.predict_proba(X_train)[:, 1]
         y_val_hat_prob = pipe.predict_proba(X_val)[:, 1]
 

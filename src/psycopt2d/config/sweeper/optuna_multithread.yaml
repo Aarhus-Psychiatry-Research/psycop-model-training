@@ -8,6 +8,6 @@ hydra:
   sweeper:
     sampler:
       seed: 123
-    n_trials: 100
-    n_jobs: 60
+    n_trials: 300
+    n_jobs: 10
     direction: maximize
