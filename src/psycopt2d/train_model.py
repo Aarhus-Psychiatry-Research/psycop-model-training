@@ -146,6 +146,7 @@ def stratified_cross_validation(
 )
 def main(cfg):
     run = wandb.init(
+        group=cfg.project.group,
         project=cfg.project.name,
         reinit=False,
         config=flatten_nested_dict(cfg, sep="."),
