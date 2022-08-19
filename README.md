@@ -77,7 +77,7 @@ python src/psycopt2d/train_model.py +model=xgboost
 
 Selecting a specific config file:
 ```
-python src/psycopt2d/train_model.py --config-name integration_testing --multirun +model=xgboos
+python src/psycopt2d/train_model.py --config-name integration_testing --multirun +model=xgboost
 ```
 
 If you want to change a hyperparameter, specify it with ++:
