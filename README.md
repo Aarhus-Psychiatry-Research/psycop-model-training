@@ -75,13 +75,17 @@ To run XGBoost with defaults:
 python src/psycopt2d/train_model.py +model=xgboost
 ```
 
-if you want to change a hyperparameter simply run:
+Selecting a specific config file:
+```
+python src/psycopt2d/train_model.py --config-name integration_testing --multirun +model=xgboos
+```
 
+If you want to change a hyperparameter, specify it with ++:
 ```
 python src/psycopt2d/train_model.py  +model=xgboost ++model.args.n_estimators=20
 ```
 
-to run a sweep with xgboost you will have to add the `--multirun` flag and specify the sweep config.
+To run a sweep with xgboost you will have to add the `--multirun` flag and specify the sweep config.
 ```
 python src/psycopt2d/train_model.py --multirun +model=xgboost
 ```
