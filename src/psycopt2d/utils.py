@@ -1,5 +1,5 @@
 from collections.abc import MutableMapping
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Dict, Iterable, List, Union
 
 import numpy as np
 import pandas as pd
@@ -12,7 +12,7 @@ from xgboost import XGBClassifier
 def flatten_nested_dict(
     d: Dict,
     parent_key: str = "",
-    sep: Optional[str] = ".",
+    sep: str = ".",
 ) -> Dict:
     """Recursively flatten an infinitely nested dict.
 
@@ -22,13 +22,13 @@ def flatten_nested_dict(
     Args:
         d (Dict): Dict to flatten.
         parent_key (str): The parent key for the current dict, e.g. "level1" for the first iteration.
-        sep (str, optional): How to separate each level in the dict. Defaults to ".".
+        sep (str): How to separate each level in the dict. Defaults to ".".
 
     Returns:
         Dict: The flattened dict.
     """
 
-    items = []
+    items: List = []
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, MutableMapping):
@@ -43,7 +43,7 @@ def drop_records_if_datediff_days_smaller_than(
     t2_col_name: str,
     t1_col_name: str,
     threshold_days: Union[float, int],
-    inplace: Optional[bool] = True,
+    inplace: bool = True,
 ) -> pd.DataFrame:
     """Drop rows where datediff is smaller than threshold_days. datediff = t2 - t1.
 
@@ -52,7 +52,7 @@ def drop_records_if_datediff_days_smaller_than(
         t2_col_name (str): _description_
         t1_col_name (str): _description_
         threshold_days (Union[float, int]): _description_
-        inplace (bool, optional): Defaults to True.
+        inplace (bool): Defaults to True.
 
     Returns:
         A pandas dataframe without the records where datadiff was smaller than threshold_days.
