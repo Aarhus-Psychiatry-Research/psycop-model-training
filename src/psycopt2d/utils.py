@@ -49,9 +49,9 @@ def drop_records_if_datediff_days_smaller_than(
 
     Args:
         df (pd.DataFrame): Dataframe.
-        t2_col_name (str): _description_
-        t1_col_name (str): _description_
-        threshold_days (Union[float, int]): _description_
+        t2_col_name (str): Column name of a time column.
+        t1_col_name (str): Column name of a time column.
+        threshold_days (Union[float, int]): Threshold days.
         inplace (bool): Defaults to True.
 
     Returns:
