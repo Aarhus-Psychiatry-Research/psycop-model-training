@@ -3,7 +3,7 @@ from datetime import date, datetime, timedelta
 from typing import List, Optional, Union
 
 import pandas as pd
-from psycopmlutils.loaders import sql_load
+from psycopmlutils.loaders.raw import sql_load
 from wasabi import Printer
 
 msg = Printer(timestamp=True)
