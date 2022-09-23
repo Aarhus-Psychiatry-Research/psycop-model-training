@@ -26,6 +26,10 @@ jobs:
     - name: setup-chromedriver
       uses: nanasess/setup-chromedriver@v1.0.7
 
+    ## Install pandoc
+    - name: Install pandoc
+      run: sudo apt install pandoc
+
     ### Caching
     - name: Load cached $HOME/.local (cache poetry)
       id: cached-poetry-install
