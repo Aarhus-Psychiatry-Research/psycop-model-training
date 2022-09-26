@@ -29,7 +29,7 @@ def flatten_nested_dict(
     """
 
     items = []
-    
+
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, MutableMapping):
