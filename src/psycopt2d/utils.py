@@ -28,13 +28,17 @@ def flatten_nested_dict(
         Dict: The flattened dict.
     """
 
-    items: List = []
+    items = []
+    
     for k, v in d.items():
         new_key = parent_key + sep + k if parent_key else k
         if isinstance(v, MutableMapping):
-            items.extend(flatten_nested_dict(d=v, parent_key=new_key, sep=sep).items())
+            items.extend(
+                flatten_nested_dict(d=v, parent_key=new_key, sep=sep).items(),
+            )  # typing: ignore
         else:
             items.append((new_key, v))
+
     return dict(items)
 
 
