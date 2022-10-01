@@ -15,10 +15,11 @@ from psycopt2d.utils import PROJECT_ROOT, read_pickle
 from psycopt2d.visualization import plot_auc_by_time_from_first_visit
 
 
-def infer_outcome_col_name(df: pd.DataFrame):
-    outcome_name = [c for c in df.columns if c.startswith("outc")]
-    if len(outcome_name) == 1:
-        return outcome_name[0]
+def get_colname_from_prefix(df: pd.DataFrame, prefix: str = "outc") -> str:
+    """Infer the outcome col_name in a dataframe based on prefix."""
+    outcome_names = [c for c in df.columns if c.startswith(prefix)]
+    if len(outcome_names) == 1:
+        return outcome_names[0]
     else:
         raise ValueError("More than one outcome inferred")
 
@@ -56,8 +57,8 @@ if __name__ == "__main__":
     )
 
     train_col_names = infer_predictor_col_names(eval_df, cfg)
-    y_col_name = infer_outcome_col_name(eval_df)
-    y_hat_prob_col_name = "y_hat_prob"  # change to 'y_hat_prob_oof' if using cv
+    y_col_name = get_colname_from_prefix(df=eval_df, prefix="outc_")
+    Y_HAT_PROB_COL_NAME = "y_hat_prob"  # change to 'y_hat_prob_oof' if using cv
     first_visit_timestamp = eval_df.groupby(cfg.data.id_col_name)[
         cfg.data.pred_timestamp_col_name
     ].transform("min")
@@ -65,7 +66,7 @@ if __name__ == "__main__":
     # Do whatever extra evaluation you want to here
     p = plot_auc_by_time_from_first_visit(
         labels=eval_df[y_col_name],
-        y_hat_probs=eval_df[y_hat_prob_col_name],
+        y_hat_probs=eval_df[Y_HAT_PROB_COL_NAME],
         first_visit_timestamps=first_visit_timestamp,
         prediction_timestamps=eval_df[cfg.data.pred_timestamp_col_name],
     )
