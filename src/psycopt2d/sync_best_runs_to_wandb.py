@@ -5,6 +5,7 @@ AUC logging file so a new hyperparameter search can be safely started.
 """
 import argparse
 import subprocess
+import time
 from pathlib import Path
 
 import pandas as pd
@@ -52,6 +53,9 @@ def sync_runs_to_wandb(runs: list[str], project: str) -> None:
     run_paths = [get_run_path(run) for run in runs]
     for run in run_paths:
         sync_single_run_to_wandb(run, project)
+
+        # Sleep to avoid rate-limiting
+        time.sleep(10)
 
 
 def archive_wandb_runs() -> None:

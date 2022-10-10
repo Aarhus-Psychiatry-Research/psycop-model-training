@@ -1,5 +1,7 @@
 """Training script for training a single model for predicting t2d."""
 import os
+import random
+import time
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Optional
@@ -301,6 +303,13 @@ def main(cfg):
     """Main function for training a single model."""
     msg = Printer(timestamp=True)
 
+    # if cfg.project.wandb_mode == "run":
+    #     # Sleep for somewhere between 0 and n_jobs seconds to avoid
+    #     # rate_limiting from wandb
+    #     time_to_sleep = random.randint(0, 60)
+    #     msg.info(f"Sleeping for {time_to_sleep} seconds to avoid rate-limiting")
+    #     time.sleep(time_to_sleep)
+
     create_wandb_folders()
 
     run = wandb.init(
@@ -308,6 +317,8 @@ def main(cfg):
         reinit=True,
         config=flatten_nested_dict(cfg, sep="."),
         mode=cfg.project.wandb_mode,
+        group="Testing grouping",
+        settings=wandb.Settings(start_method="spawn"),
     )
 
     train, val = load_dataset_with_config(cfg)

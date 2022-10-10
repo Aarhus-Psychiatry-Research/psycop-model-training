@@ -29,7 +29,9 @@ def _calc_performance(df: pd.DataFrame, metric: Callable) -> float:
     if df.empty:
         return np.nan
     elif metric is roc_auc_score and len(df["y"].unique()) == 1:
-        msg.info("Only 1 class present in bin. AUC undefined. Returning np.nan")
+        # msg.info("Only 1 class present in bin. AUC undefined. Returning np.nan") This was hit many, many times during an initial sweep.
+        # Many of our models probably try to predict the majority class.
+        # I'm not sure how exactly we want to handle this, but thousands of infos is not ideal.
         return np.nan
     else:
         return metric(df["y"], df["y_hat"])
@@ -56,7 +58,9 @@ def create_performance_by_calendar_time_df(
     """
     df = pd.DataFrame({"y": labels, "y_hat": y_hat, "timestamp": timestamps})
     df["time_bin"] = df["timestamp"].astype(f"datetime64[{bin_period}]")
+
     output_df = df.groupby("time_bin").apply(_calc_performance, metric_fn)
+
     output_df = output_df.reset_index().rename({0: "metric"}, axis=1)
     return output_df
 
