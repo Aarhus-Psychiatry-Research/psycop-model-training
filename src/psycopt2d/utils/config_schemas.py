@@ -64,6 +64,13 @@ class ProjectConf(BaseModel):
     gpu: bool
 
 
+class CustomColNames(BaseModel):
+    """All custom column names, i.e. columns that won't generalise across
+    projects."""
+
+    n_hba1c: str
+
+
 class ColumnNames(BaseModel):
     """Column names in the data."""
 
