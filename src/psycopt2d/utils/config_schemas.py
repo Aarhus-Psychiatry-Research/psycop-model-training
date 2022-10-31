@@ -78,7 +78,9 @@ class ColumnNames(BaseModel):
     outcome_timestamp: str  # Column name for outcome timestamps
     id: str  # Citizen colnames
     age: str  # Name of the age column
-    custom: CustomColNames  # Column names that are custom to the given prediction time.
+
+    custom: Optional[CustomColNames] = None
+    # Column names that are custom to the given prediction problem.
 
 
 class DataConf(BaseModel):

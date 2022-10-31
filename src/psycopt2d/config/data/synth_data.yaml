@@ -6,8 +6,10 @@ data:
   min_lookahead_days: 30
   min_lookbehind_days: 100
   min_prediction_time_date: null
+  pred_prefix: pred_
+
   col_name:
-    pred_prefix: pred_
+    age: age
     pred_timestamp: timestamp
     outcome_timestamp: timestamp_outcome
     id: citizen_ids
@@ -16,7 +18,6 @@ data:
   drop_patient_if_outcome_before_date: null
 
   # Looking behind
-  max_lookbehind_days: 1850
   lookbehind_combination: [30, 60, 100]
 
 # Parameters that will only take effect if running with --multirun
