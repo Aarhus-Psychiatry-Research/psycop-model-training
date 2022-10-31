@@ -5,12 +5,18 @@ from psycopmlutils.synth_data_generator.synth_prediction_times_generator import 
     generate_synth_data,
 )
 
+from psycopt2d.utils.utils import PROJECT_ROOT
+
 
 def test_synth_data_generator():
     """Test synth data generator."""
+    generate_new_splits = True
+    synth_data_dir = PROJECT_ROOT / "tests" / "test_data" / "synth_splits"
+
     column_specifications = [
         {"citizen_ids": {"column_type": "uniform_int", "min": 0, "max": 1_200_001}},
         {"timestamp": {"column_type": "datetime_uniform", "min": 0, "max": 5 * 365}},
+        {"age": {"column_type": "uniform_int", "min": 18, "max": 100}},
         {
             "timestamp_outcome": {
                 "column_type": "datetime_uniform",
@@ -70,3 +76,6 @@ def test_synth_data_generator():
         synth_df.describe()
 
         assert synth_df.shape == (n_samples, len(column_specifications) + 1)
+
+        if generate_new_splits:
+            synth_df.to_csv(synth_data_dir / f"synth_{split}.csv", index=False)

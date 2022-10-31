@@ -5,7 +5,9 @@ from psycopt2d.load import load_train_and_val_from_cfg
 from psycopt2d.utils.config_schemas import convert_omegaconf_to_pydantic_object
 
 
-def test_load_lookbehind_exceeds_lookbehind_threshold():
+def test_load_lookbehind_exceeds_lookbehind_threshold(
+    synth_data_generator,  # pylint: disable=unused-argument
+):
     """Test that columns are dropped if their lookbehind are larger than the
     lookbehind threshold."""
     with initialize(version_base=None, config_path="../src/psycopt2d/config/"):
