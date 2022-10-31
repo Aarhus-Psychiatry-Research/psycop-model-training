@@ -350,7 +350,7 @@ def get_col_names(cfg: DictConfig, train: pd.DataFrame) -> tuple[str, list[str]]
     )
 
     train_col_names = [  # pylint: disable=invalid-name
-        c for c in train.columns if c.startswith(cfg.data.col_name.pred_prefix)
+        c for c in train.columns if c.startswith(cfg.data.pred_prefix)
     ]
 
     return outcome_col_name, train_col_names
