@@ -201,10 +201,8 @@ def train_and_eval_on_crossvalidation(
         y_hat_int=df["y_hat_prob"].round(),
         pred_timestamps=df[cfg.data.col_name.pred_timestamp],
         outcome_timestamps=df[cfg.data.col_name.outcome_timestamp],
+        age=df[cfg.data.col_name.age],
     )
-
-    if cfg.data.col_name.age:
-        eval_dataset.age = df[cfg.data.col_name.age]
 
     return eval_dataset
 
