@@ -1,7 +1,7 @@
 convert_to_boolean: false
 convert_datetimes_to_ordinal: false
-imputation_method: "most_frequent" # (str): Options include 2most_frequent"
-transform: null # (str|null): Transformation applied to all predictors after imputation. Options include "z-score-normalization"
+imputation_method: "most_frequent"
+transform: null
 feature_selection:
   name: null
   params:
