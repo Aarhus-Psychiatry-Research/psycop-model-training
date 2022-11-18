@@ -224,6 +224,14 @@ def run_full_evaluation(
             ),
         ]
 
+    # if 'feature_selection' in pipe["preprocessing"].named_steps:
+    #     selected_features = eval_df[train_col_names].columns[pipe["preprocessing"]["feature_selection"].get_support()].to_list()
+
+    #     run.log({"feature_selection_table": feature_selection_table(
+    #         feature_names=train_col_names,
+    #         selected_feature_names=selected_features,
+    #     )})
+
     if upload_to_wandb and run is None:
         raise ValueError("Must pass a run to be able to upload to wandb.")
 
