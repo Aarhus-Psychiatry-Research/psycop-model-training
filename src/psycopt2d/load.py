@@ -14,7 +14,9 @@ from wasabi import Printer
 
 from psycopt2d.evaluate_saved_model_predictions import infer_look_distance
 from psycopt2d.utils.config_schemas import FullConfigSchema
+from psycopt2d.utils.pd_cache_decorator import cache_pandas_result
 from psycopt2d.utils.utils import (
+    FEATURE_SETS_PATH,
     get_percent_lost,
     infer_outcome_col_name,
     infer_predictor_col_name,
@@ -457,13 +459,6 @@ class DataLoader:
             axis=1,
         )
 
-        # Super hacky transformation of negative weights (?!) for chi-square.
-        # In the future, we want to:
-        # 1. Fix this in the feature generation for t2d
-        # 2a. See if there's a way of using feature selection that permits negative values, or
-        # 2b. Always use z-score normalisation?
-        dataset = self._negative_values_to_nan(dataset=dataset)
-
         dataset = self.convert_timestamp_dtype_and_nat(dataset=dataset)
 
         if self.cfg.preprocessing.convert_booleans_to_int:
@@ -495,6 +490,7 @@ class DataLoader:
 
         return dataset
 
+    @cache_pandas_result(cache_dir=FEATURE_SETS_PATH / "dataset_cache")
     def load_dataset_from_dir(
         self,
         split_names: Union[Iterable[str], str],
