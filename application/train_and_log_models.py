@@ -64,8 +64,37 @@ def start_trainer(
 
 
 class TrainerSpec(BaseModel):
+    """Specification for starting a trainer. Provides overrides for the config file."""
+
     lookahead_days: int
     model_name: str
+
+
+def combine_lookaheads_and_model_names_to_trainer_specs(
+    cfg: FullConfigSchema,
+    possible_lookahead_days: list[int],
+    model_names: Optional[list[str]] = None,
+):
+    """Generate trainer specs for all combinations of lookaheads and model names."""
+    msg = Printer(timestamp=True)
+
+    random.shuffle(possible_lookahead_days)
+
+    if model_names:
+        msg.warn(
+            "model_names was specified in train_models_for_each_cell_in_grid, overriding cfg.model.name",
+        )
+
+    model_name_queue = model_names if model_names else cfg.model.name
+
+    # Create all combinations of lookahead_days and models
+    trainer_combinations_queue = [
+        TrainerSpec(lookahead_days=lookahead_days, model_name=model_name)
+        for lookahead_days in possible_lookahead_days.copy()
+        for model_name in model_name_queue
+    ]
+
+    return trainer_combinations_queue
 
 
 def train_models_for_each_cell_in_grid(
@@ -119,32 +148,6 @@ def train_models_for_each_cell_in_grid(
         # to the same resources at the same time. Decreases overlap,
         # decreasing overhead.
         time.sleep(30)
-
-
-def combine_lookaheads_and_model_names_to_trainer_specs(
-    cfg: FullConfigSchema,
-    possible_lookahead_days: list[int],
-    model_names: Optional[list[str]] = None,
-):
-    msg = Printer(timestamp=True)
-
-    random.shuffle(possible_lookahead_days)
-
-    if model_names:
-        msg.warn(
-            "model_names was specified in train_models_for_each_cell_in_grid, overriding cfg.model.name"
-        )
-
-    model_name_queue = model_names if model_names else cfg.model.name
-
-    # Create all combinations of lookahead_days and models
-    trainer_combinations_queue = [
-        TrainerSpec(lookahead_days=lookahead_days, model_name=model_name)
-        for lookahead_days in possible_lookahead_days.copy()
-        for model_name in model_name_queue
-    ]
-
-    return trainer_combinations_queue
 
 
 def get_possible_lookaheads(
