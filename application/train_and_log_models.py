@@ -64,7 +64,10 @@ def start_trainer(
 
 
 class TrainerSpec(BaseModel):
-    """Specification for starting a trainer. Provides overrides for the config file."""
+    """Specification for starting a trainer.
+
+    Provides overrides for the config file.
+    """
 
     lookahead_days: int
     model_name: str
@@ -75,7 +78,8 @@ def combine_lookaheads_and_model_names_to_trainer_specs(
     possible_lookahead_days: list[int],
     model_names: Optional[list[str]] = None,
 ):
-    """Generate trainer specs for all combinations of lookaheads and model names."""
+    """Generate trainer specs for all combinations of lookaheads and model
+    names."""
     msg = Printer(timestamp=True)
 
     random.shuffle(possible_lookahead_days)
