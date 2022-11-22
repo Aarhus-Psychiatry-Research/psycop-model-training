@@ -91,6 +91,7 @@ def get_feature_selection_steps(cfg):
 
 def create_preprocessing_pipeline(cfg: FullConfigSchema):
     """Create preprocessing pipeline based on config."""
+    msg = Printer(timestamp=True)
     steps = []
     # Conversion
     if cfg.preprocessing.drop_datetime_predictor_columns:
@@ -110,9 +111,12 @@ def create_preprocessing_pipeline(cfg: FullConfigSchema):
 
     # Imputation
     if cfg.model.require_imputation and not cfg.preprocessing.imputation_method:
-        raise ValueError(
-            f"{cfg.model.name} requires imputation, but no imputation method was specified in the config file.",
+        msg.warn(
+            f"{cfg.model.name} requires imputation, but no imputation method was specified in the config file. Overriding to 'mean'.",
         )
+
+        cfg.preprocessing.imputation_method = "mean"
+        # Not a great solution, but preferable to the script breaking and stopping a hyperparameter search.
 
     if cfg.preprocessing.imputation_method:
         steps.append(
