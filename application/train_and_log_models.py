@@ -148,11 +148,6 @@ def train_models_for_each_cell_in_grid(
             ),
         )
 
-        # Sleep for 30 seconds to avoid all trainers wanting access
-        # to the same resources at the same time. Decreases overlap,
-        # decreasing overhead.
-        time.sleep(30)
-
 
 def get_possible_lookaheads(
     msg: Printer,
