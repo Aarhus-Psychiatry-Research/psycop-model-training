@@ -53,7 +53,7 @@ def start_trainer(
     if cfg.train.n_trials_per_lookahead > 1:
         subprocess_args.insert(2, "--multirun")
 
-    if cfg.model.name == "xgboost":
+    if model_name == "xgboost":
         subprocess_args.insert(3, "++model.args.tree_method='gpu_hist'")
 
     msg.info(f'{" ".join(subprocess_args)}')
