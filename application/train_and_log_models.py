@@ -8,6 +8,7 @@ Usage:
 import random
 import subprocess
 import time
+from typing import Optional
 
 import pandas as pd
 import wandb
@@ -19,7 +20,11 @@ from psycopt2d.evaluate_saved_model_predictions import (
     infer_outcome_col_name,
 )
 from psycopt2d.load import load_train_raw
-from psycopt2d.utils.config_schemas import FullConfigSchema, load_cfg_as_pydantic
+from psycopt2d.utils.config_schemas import (
+    BaseModel,
+    FullConfigSchema,
+    load_cfg_as_pydantic,
+)
 
 
 def start_trainer(
@@ -27,6 +32,7 @@ def start_trainer(
     config_file_name: str,
     lookahead_days: int,
     wandb_group_override: str,
+    model_name: str,
 ) -> subprocess.Popen:
     """Start a trainer."""
     msg = Printer(timestamp=True)
@@ -38,7 +44,7 @@ def start_trainer(
         f"project.wandb.mode={cfg.project.wandb.mode}",
         f"hydra.sweeper.n_trials={cfg.train.n_trials_per_lookahead}",
         f"hydra.sweeper.n_jobs={cfg.train.n_jobs_per_trainer}",
-        f"model={cfg.model.name}",
+        f"model={model_name}",
         f"data.min_lookahead_days={lookahead_days}",
         "--config-name",
         f"{config_file_name}",
@@ -57,25 +63,32 @@ def start_trainer(
     )
 
 
+class TrainerSpec(BaseModel):
+    lookahead_days: int
+    model_name: str
+
+
 def train_models_for_each_cell_in_grid(
     cfg: FullConfigSchema,
     possible_lookahead_days: list[int],
     config_file_name: str,
     wandb_prefix: str,
+    model_names: Optional[list[str]] = None,
 ):
     """Train a model for each cell in the grid of possible look distances."""
-
-    random.shuffle(possible_lookahead_days)
-
     active_trainers: list[subprocess.Popen] = []
 
-    lookahead_days_queue = possible_lookahead_days.copy()
+    trainer_combinations_queue = combine_lookaheads_and_model_names_to_trainer_specs(
+        cfg=cfg,
+        possible_lookahead_days=possible_lookahead_days,
+        model_names=model_names,
+    )
 
-    while possible_lookahead_days or active_trainers:
+    while trainer_combinations_queue or active_trainers:
         # Wait until there is a free slot in the trainers group
         if (
             len(active_trainers) >= cfg.train.n_active_trainers
-            or len(lookahead_days_queue) == 0
+            or len(trainer_combinations_queue) == 0
         ):
             # Drop trainers if they have finished
             # If finished, t.poll() is not None
@@ -84,11 +97,11 @@ def train_models_for_each_cell_in_grid(
             continue
 
         # Start a new trainer
-        lookahead_days = lookahead_days_queue.pop()
+        trainer_spec = trainer_combinations_queue.pop()
 
         msg = Printer(timestamp=True)
         msg.info(
-            f"Spawning a new trainer with lookahead={lookahead_days} days",
+            f"Spawning a new trainer with lookahead={trainer_spec.lookahead_days} days",
         )
         wandb_group = f"{wandb_prefix}"
 
@@ -96,8 +109,9 @@ def train_models_for_each_cell_in_grid(
             start_trainer(
                 cfg=cfg,
                 config_file_name=config_file_name,
-                lookahead_days=lookahead_days,
+                lookahead_days=trainer_spec.lookahead_days,
                 wandb_group_override=wandb_group,
+                model_name=trainer_spec.model_name,
             ),
         )
 
@@ -105,6 +119,32 @@ def train_models_for_each_cell_in_grid(
         # to the same resources at the same time. Decreases overlap,
         # decreasing overhead.
         time.sleep(30)
+
+
+def combine_lookaheads_and_model_names_to_trainer_specs(
+    cfg: FullConfigSchema,
+    possible_lookahead_days: list[int],
+    model_names: Optional[list[str]] = None,
+):
+    msg = Printer(timestamp=True)
+
+    random.shuffle(possible_lookahead_days)
+
+    if model_names:
+        msg.warn(
+            "model_names was specified in train_models_for_each_cell_in_grid, overriding cfg.model.name"
+        )
+
+    model_name_queue = model_names if model_names else cfg.model.name
+
+    # Create all combinations of lookahead_days and models
+    trainer_combinations_queue = [
+        TrainerSpec(lookahead_days=lookahead_days, model_name=model_name)
+        for lookahead_days in possible_lookahead_days.copy()
+        for model_name in model_name_queue
+    ]
+
+    return trainer_combinations_queue
 
 
 def get_possible_lookaheads(
@@ -188,6 +228,7 @@ def main():
         possible_lookahead_days=possible_lookaheads,
         config_file_name=config_file_name,
         wandb_prefix=wandb_group,
+        model_names=["xgboost", "logistic-regression"],
     )
 
 
