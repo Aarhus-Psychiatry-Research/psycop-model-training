@@ -32,7 +32,7 @@ python-Levenshtein = ">=0.10.2,<0.20.9"
 
 
 [tool.poetry.dev-dependencies]
-pre-commit = ">=2.19.0,<2.19.1"
+pre-commit = ">=2.19.0,<2.21.1"
 pytest = ">=7.1.2,<7.2.1"
 pytest-cov = ">=3.0.0,<4.0.1"
 black = ">=22.3.0,<22.13.0"
