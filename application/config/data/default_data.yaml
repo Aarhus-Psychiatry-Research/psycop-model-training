@@ -2,7 +2,7 @@
 data:
   # General config
   n_training_samples: null
-  dir: E:\shared_resources\scz-bp\feature_sets\psycop_scz-bp_adminlasha6_features_2023_01_17_09_42
+  dir: E:\shared_resources\scz-bp\feature_sets\psycop_scz-bp_adminlasha6_features_2023_01_19_10_38
   suffix: parquet
 
   # Feature specs
@@ -14,7 +14,7 @@ data:
     outcome_timestamp: timestamp_first_scz-bp_diagnosis
     id: dw_ek_borger
     age: pred_age_in_years
-    exclusion_timestamp: timestamp_exclusion
+    exclusion_timestamp: null
     custom_columns: # is this used?
       - main_diagnosis
       - detailed_diagnosis
