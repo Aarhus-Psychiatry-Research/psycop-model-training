@@ -11,7 +11,7 @@ class ColumnNamesSchema(BaseModel):
     outcome_timestamp: str  # Column name for outcome timestamps
     id: str  # Citizen colnames
     age: str  # Name of the age column
-    exclusion_timestamp: str  # Name of the exclusion timestamps column.
+    exclusion_timestamp: Optional[str]  # Name of the exclusion timestamps column.
     # Drops all visits whose pred_timestamp <= exclusion_timestamp.
     custom_columns: Optional[list[str]] = None
 
