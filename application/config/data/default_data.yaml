@@ -2,7 +2,7 @@
 data:
   # General config
   n_training_samples: null
-  dir: E:\shared_resources\scz-bp\feature_sets\psycop_scz-bp_adminlasha6_features_2023_01_19_10_38
+  dir: E:\shared_resources\scz-bp\feature_sets\psycop_scz-bp_adminlasha6_features_2023_01_26_11_33\timezone_normlized
   suffix: parquet
 
   # Feature specs

@@ -40,9 +40,12 @@ def normalize_timestamp_column(df: pd.DataFrame, timestamp_column: str) -> pd.Da
 def save_split(cfg: FullConfigSchema, split_name: str, df: pd.DataFrame):
     """Save the split."""
     data_dir = Path(cfg.data.dir)
-    path = list(data_dir.glob(f"*{split_name}*.{cfg.data.suffix}"))[0]
-    print(f"Saving {path}")
-    df.to_parquet(path)
+    path = list(data_dir.glob(f"*{split_name}*.{cfg.data.suffix}"))[0].name
+    save_path = data_dir / "timezone_normlized"
+    save_path.mkdir(exist_ok=True)
+    save_path = save_path / path
+    print(f"Saving {save_path}")
+    df.to_parquet(save_path)
 
 
 if __name__ == "__main__":
