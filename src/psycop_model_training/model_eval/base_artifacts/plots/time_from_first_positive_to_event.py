@@ -26,7 +26,7 @@ def plot_time_from_first_positive_to_event(
 
     df = pd.DataFrame(
         {
-            "y_hat_int": eval_dataset.y_hat_int,
+            "y_hat": eval_dataset.y_hat_probs,
             "y": eval_dataset.y,
             "patient_id": eval_dataset.ids,
             "pred_timestamp": eval_dataset.pred_timestamps,
@@ -35,8 +35,10 @@ def plot_time_from_first_positive_to_event(
         },
     )
 
+    threshold = 0.025
+
     # Get only rows where prediction is positive and outcome is positive
-    df = df[(df["y_hat_int"] == 1) & (df["y"] == 1)]
+    df = df[(df["y_hat"] >= threshold) & (df["y"] == 1)]
 
     # Sort by timestamp
     df = df.sort_values("pred_timestamp")
