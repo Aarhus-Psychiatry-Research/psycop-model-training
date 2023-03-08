@@ -70,6 +70,29 @@ class BaseArtifactGenerator:
 
         return [
             ArtifactContainer(
+                label="precision_recall",
+                artifact=plot_recall_by_calendar_time(
+                    eval_dataset=self.eval_ds,
+                    pred_proba_percentile=[
+                        1 - (threshold) / 100
+                        for threshold in self.cfg.eval.positive_rate_thresholds
+                        if threshold > 0
+                    ],
+                    bins=self.cfg.eval.lookahead_bins,
+                    y_limits=(0, 1),
+                    save_path=self.save_dir
+                    / "performance_by_duration"
+                    / "recall_by_calendar_time.png",
+                ),
+            ),
+            ArtifactContainer(
+                label="precision_recall",
+                artifact=plot_precision_recall(
+                    eval_dataset=self.eval_ds,
+                    save_path=self.save_dir / "precision_recall.png",
+                ),
+            ),
+            ArtifactContainer(
                 label="sensitivity_by_time_by_threshold",
                 artifact=plot_sensitivity_by_time_to_outcome_heatmap(
                     eval_dataset=self.eval_ds,
@@ -90,7 +113,9 @@ class BaseArtifactGenerator:
                 label="auc_by_calendar_time",
                 artifact=plot_metric_by_calendar_time(
                     eval_dataset=self.eval_ds,
-                    save_path=self.save_dir / "performance_by_duration" / "auc_by_calendar_time.png",
+                    save_path=self.save_dir
+                    / "performance_by_duration"
+                    / "auc_by_calendar_time.png",
                 ),
             ),
             ArtifactContainer(
@@ -98,7 +123,9 @@ class BaseArtifactGenerator:
                 artifact=plot_metric_by_cyclic_time(
                     eval_dataset=self.eval_ds,
                     bin_period="H",
-                    save_path=self.save_dir / "performance_by_cyclic_time" / "auc_by_hour_of_day.png",
+                    save_path=self.save_dir
+                    / "performance_by_cyclic_time"
+                    / "auc_by_hour_of_day.png",
                 ),
             ),
             ArtifactContainer(
@@ -106,7 +133,9 @@ class BaseArtifactGenerator:
                 artifact=plot_metric_by_cyclic_time(
                     eval_dataset=self.eval_ds,
                     bin_period="D",
-                    save_path=self.save_dir / "performance_by_cyclic_time" / "auc_by_day_of_week.png",
+                    save_path=self.save_dir
+                    / "performance_by_cyclic_time"
+                    / "auc_by_day_of_week.png",
                 ),
             ),
             ArtifactContainer(
@@ -114,7 +143,9 @@ class BaseArtifactGenerator:
                 artifact=plot_metric_by_cyclic_time(
                     eval_dataset=self.eval_ds,
                     bin_period="M",
-                    save_path=self.save_dir/ "performance_by_cyclic_time"  / "auc_by_month_of_year.png",
+                    save_path=self.save_dir
+                    / "performance_by_cyclic_time"
+                    / "auc_by_month_of_year.png",
                 ),
             ),
             ArtifactContainer(
@@ -131,7 +162,9 @@ class BaseArtifactGenerator:
                     bins=lookahead_bins,
                     metric_fn=recall_score,
                     y_title="Sensitivity (recall)",
-                    save_path=self.save_dir / "performance_by_duration" / "recall_by_time_to_diagnosis.png",
+                    save_path=self.save_dir
+                    / "performance_by_duration"
+                    / "recall_by_time_to_diagnosis.png",
                 ),
             ),
             ArtifactContainer(
@@ -147,7 +180,9 @@ class BaseArtifactGenerator:
                 label="performance_by_age",
                 artifact=plot_performance_by_age(
                     eval_dataset=self.eval_ds,
-                    save_path=self.save_dir / "performance_by_subgroup" / "auc_by_age.png",
+                    save_path=self.save_dir
+                    / "performance_by_subgroup"
+                    / "auc_by_age.png",
                 ),
             ),
             ArtifactContainer(
@@ -155,25 +190,9 @@ class BaseArtifactGenerator:
                 artifact=plot_time_from_first_positive_to_event(
                     eval_dataset=self.eval_ds,
                     bins=range(0, 730, 24),
-                    save_path=self.save_dir / "performance_by_duration" / "time_from_first_positive_to_event.png",
-                ),
-            ),
-            ArtifactContainer(
-                label="precision_recall",
-                artifact=plot_precision_recall(
-                    eval_dataset=self.eval_ds,
-                    save_path=self.save_dir / "precision_recall.png",
-                ),
-            ),
-            ArtifactContainer(
-                label="precision_recall",
-                artifact=plot_recall_by_calendar_time(
-                    eval_dataset=self.eval_ds,
-                    pred_proba_percentile=[0.95, 0.97, 0.99],
-                    bins=self.cfg.eval.lookahead_bins,
-                    legend=True,
-                    y_limits=(0, 0.5),
-                    save_path=self.save_dir / "performance_by_duration" / "recall_by_calendar_time.png",
+                    save_path=self.save_dir
+                    / "performance_by_duration"
+                    / "time_from_first_positive_to_event.png",
                 ),
             ),
         ]

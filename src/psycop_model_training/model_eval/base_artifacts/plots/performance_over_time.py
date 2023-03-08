@@ -57,7 +57,7 @@ def plot_recall_by_calendar_time(
     pred_proba_percentile: Union[float, Iterable[float]],
     bins: Iterable[float],
     y_title: str = "Sensitivity (Recall)",
-    y_limits: Optional[tuple[float, float]] = None,
+    y_limits: Optional[tuple[float, float]] = (0, 1),
     save_path: Optional[str] = None,
 ) -> Union[None, Path]:
     """Plot performance by calendar time of prediciton.
