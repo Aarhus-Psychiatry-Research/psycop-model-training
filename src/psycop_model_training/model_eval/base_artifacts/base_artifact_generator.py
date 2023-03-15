@@ -40,7 +40,7 @@ from psycop_model_training.model_eval.dataclasses import (
     PipeMetadata,
 )
 from psycop_model_training.utils.utils import positive_rate_to_pred_probs
-from sklearn.metrics import recall_score
+from sklearn.metrics import recall_score, roc_auc_score
 
 
 class BaseArtifactGenerator:
@@ -99,6 +99,7 @@ class BaseArtifactGenerator:
                     eval_dataset=self.eval_ds,
                     bin_period="H",
                     save_path=self.save_dir / "auc_by_hour_of_day.png",
+                    metric_fn=roc_auc_score,
                 ),
             ),
             ArtifactContainer(
@@ -106,6 +107,7 @@ class BaseArtifactGenerator:
                 artifact=plot_metric_by_cyclic_time(
                     eval_dataset=self.eval_ds,
                     bin_period="D",
+                    metric_fn=roc_auc_score,
                     save_path=self.save_dir / "auc_by_day_of_week.png",
                 ),
             ),
@@ -114,6 +116,7 @@ class BaseArtifactGenerator:
                 artifact=plot_metric_by_cyclic_time(
                     eval_dataset=self.eval_ds,
                     bin_period="M",
+                    metric_fn=roc_auc_score,
                     save_path=self.save_dir / "auc_by_month_of_year.png",
                 ),
             ),
