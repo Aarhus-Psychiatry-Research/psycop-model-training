@@ -39,7 +39,7 @@ def plot_performance_by_sex(
         bin_continuous_input=False,
     )
 
-    df.sex = df.sex.replace({1: "female", 0: "male"})
+    df.sex = df.sex.replace({1: "Female", 0: "Male"})
 
     return plot_basic_chart(
         x_values=df["sex"],
@@ -47,6 +47,8 @@ def plot_performance_by_sex(
         x_title="Sex",
         y_title="AUC",
         y_limits=y_limits,
-        plot_type=["bar"],
+        bar_count_values=df["n_in_bin"],
+        bar_count_y_axis_title="Number of visits",
+        plot_type=["line", "scatter"],
         save_path=save_path,
     )

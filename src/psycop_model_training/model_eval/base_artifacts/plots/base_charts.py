@@ -120,6 +120,11 @@ def plot_basic_chart(
         bar_overlay.bar(df["x"], bar_count_values, color="gainsboro", alpha=0.5)
         bar_overlay.set_ylabel(bar_count_y_axis_title)
 
+        # Add thousands separator to y-axis
+        bar_overlay.get_yaxis().set_major_formatter(
+            plt.FuncFormatter(lambda x, loc: f"{int(x):,}"),
+        )
+
         # put bar plots behind other plots
         axs.set_zorder(bar_overlay.get_zorder() + 1)
         axs.set_facecolor("none")
