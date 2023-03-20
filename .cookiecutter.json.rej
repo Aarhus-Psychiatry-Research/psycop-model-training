@@ -1,0 +1,8 @@
+diff a/.cookiecutter.json b/.cookiecutter.json	(rejected hunks)
+@@ -11,5 +11,6 @@
+     "license": "MIT",
+     "package_name": "psycop_model_training",
+     "project_name": "psycop-model-training",
++    "setup_for_dev_bash_script": "y",
+     "version": "0.0.0"
+ }
