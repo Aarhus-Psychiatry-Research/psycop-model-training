@@ -89,7 +89,9 @@ def train_model(
     # but rather logs to wandb and starts another run with a new combination of
     # hyperparameters
     roc_auc = post_wandb_setup_train_model(
-        cfg, artifacts=artifacts, id_col_name=id_col_name,
+        cfg,
+        artifacts=artifacts,
+        id_col_name=id_col_name,
     )
 
     return roc_auc
