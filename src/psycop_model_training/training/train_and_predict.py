@@ -41,6 +41,7 @@ def stratified_cross_validation(  # pylint: disable=too-many-locals
     train_col_names: list[str],
     outcome_col_name: str,
     n_splits: int,
+    id_col_name: Optional[str] = None,
 ) -> pd.DataFrame:
     """Performs stratified and grouped cross validation using the pipeline."""
     msg = Printer(timestamp=True)
@@ -52,10 +53,13 @@ def stratified_cross_validation(  # pylint: disable=too-many-locals
     msg.info("Creating folds")
     msg.info(f"Training on {X.shape[1]} columns and {X.shape[0]} rows")
 
+    if id_col_name is None:
+        id_col_name = cfg.data.col_name.id
+
     folds = StratifiedGroupKFold(n_splits=n_splits).split(
         X=X,
         y=y,
-        groups=train_df[cfg.data.col_name.id],
+        groups=train_df[id_col_name],
     )
 
     # Perform CV and get out of fold predictions
@@ -92,6 +96,7 @@ def crossval_train_and_predict(
     outcome_col_name: str,
     train_col_names: list[str],
     n_splits: int,
+    id_col_name: Optional[str] = None,
 ) -> EvalDataset:
     """Train model on cross validation folds and return evaluation dataset.
 
@@ -103,6 +108,7 @@ def crossval_train_and_predict(
         outcome_col_name: Name of the outcome column
         train_col_names: Names of the columns to use for training
         n_splits: Number of folds for cross validation.
+        id_col_name: name of id column
 
     Returns:
         Evaluation dataset
@@ -119,6 +125,7 @@ def crossval_train_and_predict(
         train_col_names=train_col_names,
         outcome_col_name=outcome_col_name,
         n_splits=n_splits,
+        id_col_name=id_col_name,
     )
 
     df = df.rename(columns={"oof_y_hat": "y_hat_prob"})
@@ -184,6 +191,7 @@ def train_and_predict(
     outcome_col_name: str,
     train_col_names: list[str],
     n_splits: Optional[int],
+    id_col_name: Optional[str] = None,
 ) -> EvalDataset:
     """Train model and return evaluation dataset.
 
@@ -195,6 +203,7 @@ def train_and_predict(
         outcome_col_name: Name of the outcome column
         train_col_names: Names of the columns to use for training
         n_splits: Number of folds for cross validation. If None, no cross validation is performed.
+        id_col_name: Name of the id col
 
     Returns:
         Evaluation dataset
@@ -223,6 +232,7 @@ def train_and_predict(
             outcome_col_name=outcome_col_name,
             train_col_names=train_col_names,
             n_splits=n_splits,
+            id_col_name=id_col_name,
         )
 
     return eval_dataset

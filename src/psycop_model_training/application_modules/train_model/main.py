@@ -44,6 +44,7 @@ def get_eval_dir(cfg: FullConfigSchema) -> Path:
 def post_wandb_setup_train_model(
     cfg: FullConfigSchema,
     artifacts: Optional[Sequence[ArtifactContainer]] = None,
+    id_col_name: Optional[str] = None,
 ) -> float:
     """Train a single model and evaluate it."""
     eval_dir_path = get_eval_dir(cfg)
@@ -60,6 +61,7 @@ def post_wandb_setup_train_model(
         outcome_col_name=outcome_col_name,
         train_col_names=train_col_names,
         n_splits=cfg.train.n_splits,
+        id_col_name=id_col_name,
     )
 
     roc_auc = ModelEvaluator(
@@ -78,6 +80,7 @@ def post_wandb_setup_train_model(
 def train_model(
     cfg: FullConfigSchema,
     artifacts: Optional[Sequence[ArtifactContainer]] = None,
+    id_col_name: Optional[str] = None,
 ) -> float:
     """Main function for training a single model."""
     WandbHandler(cfg=cfg).setup_wandb()
@@ -85,6 +88,8 @@ def train_model(
     # Try except block ensures process doesn't die in the case of an exception,
     # but rather logs to wandb and starts another run with a new combination of
     # hyperparameters
-    roc_auc = post_wandb_setup_train_model(cfg, artifacts=artifacts)
+    roc_auc = post_wandb_setup_train_model(
+        cfg, artifacts=artifacts, id_col_name=id_col_name
+    )
 
     return roc_auc
