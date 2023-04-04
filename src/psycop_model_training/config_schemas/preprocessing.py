@@ -30,7 +30,7 @@ class PreSplitPreprocessingConfigSchema(BaseModel):
     convert_booleans_to_int: bool = False
     # Whether to convert columns containing booleans to int
 
-    negative_values_to_nan: bool = True
+    negative_values_to_nan: bool = False
     # Whether to change negative values to NaN. Defaults to True since Chi2 cannot handle negative values. Can only be set to True if Chi2 is not used for feature selection.
 
     drop_datetime_predictor_columns: bool = False
