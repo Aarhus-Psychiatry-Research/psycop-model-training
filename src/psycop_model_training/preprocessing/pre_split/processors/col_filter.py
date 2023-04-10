@@ -161,25 +161,25 @@ class PresSplitColFilter:
             allow_multiple=True,
         )
 
-        col_to_drop = [
-            c
-            for c in outcome_cols
-            if f"_{str(self.pre_split_cfg.min_lookahead_days)}_" not in c
-        ]
+        # col_to_drop = [
+        #     c
+        #     for c in outcome_cols
+        #     if f"_{str(self.pre_split_cfg.min_lookahead_days)}_" not in c
+        # ]
 
-        # If no columns to drop, return the dataset
-        if not col_to_drop:
-            return dataset
+        # # If no columns to drop, return the dataset
+        # if not col_to_drop:
+        #     return dataset
 
-        df = dataset.drop(col_to_drop, axis=1)
+        # df = dataset.drop(col_to_drop, axis=1)
 
-        n_col_names = len(infer_outcome_col_name(df))
-        if n_col_names > 1:
-            raise ValueError(
-                f"Returning {n_col_names} outcome columns, will cause problems during eval.",
-            )
+        # n_col_names = len(infer_outcome_col_name(df, prefix=self.data_cfg.outc_prefix))
+        # if n_col_names > 1:
+        #     raise ValueError(
+        #         f"Returning {n_col_names} outcome columns, will cause problems during eval.",
+        #     )
 
-        return df
+        return dataset
 
     @staticmethod
     def _drop_datetime_columns(

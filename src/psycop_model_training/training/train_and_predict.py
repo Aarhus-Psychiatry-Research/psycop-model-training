@@ -4,13 +4,14 @@ from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
+from sklearn.multioutput import MultiOutputClassifier
 from psycop_model_training.config_schemas.full_config import FullConfigSchema
 from psycop_model_training.training.model_specs import MODELS
 from psycop_model_training.training.utils import create_eval_dataset
 from psycop_model_training.training_output.dataclasses import EvalDataset
 from psycop_model_training.utils.utils import PROJECT_ROOT
 from sklearn.metrics import roc_auc_score
-from sklearn.model_selection import StratifiedGroupKFold
+from sklearn.model_selection import GroupKFold, StratifiedGroupKFold
 from sklearn.pipeline import Pipeline
 from wasabi import Printer
 
@@ -21,7 +22,7 @@ os.environ["WANDB_START_METHOD"] = "thread"
 log = Printer(timestamp=True)
 
 
-def create_model(cfg: FullConfigSchema) -> Any:
+def create_model(cfg: FullConfigSchema, multilabel: Optional[bool] = True) -> Any:
     """Instantiate and return a model object based on settings in the config
     file."""
     model_dict = MODELS.get(cfg.model.name)
@@ -30,6 +31,9 @@ def create_model(cfg: FullConfigSchema) -> Any:
 
     training_arguments = cfg.model.args
     model_args.update(training_arguments)
+
+    if multilabel:
+        return MultiOutputClassifier(model_dict["model"](**model_args))
 
     return model_dict["model"](**model_args)
 
@@ -176,12 +180,93 @@ def train_val_predict(
     )
 
 
+def crossval_multilabel_and_predict(
+    cfg: FullConfigSchema,
+    pipe: Pipeline,
+    train: pd.DataFrame,
+    train_col_names: list[str],
+    outcome_col_name: list[str],
+    n_splits: int,
+) -> pd.DataFrame:
+    """Performs stratified and grouped cross validation using the pipeline."""
+    msg = Printer(timestamp=True)
+
+    X = train[train_col_names]  # pylint: disable=invalid-name
+    y = train[outcome_col_name]  # pylint: disable=invalid-name
+
+    # Create folds
+    msg.info("Creating folds")
+    msg.info(f"Training on {X.shape[1]} columns and {X.shape[0]} rows")
+
+    folds = GroupKFold(n_splits=n_splits).split(
+        X=X,
+        y=y,
+        groups=train[cfg.data.col_name.id],
+    )
+
+    # Perform CV and get out of fold predictions
+    train["y_hat_prob"] = np.nan
+
+    for i, (train_idxs, val_idxs) in enumerate(folds):
+        msg_prefix = f"Fold {i + 1}"
+
+        msg.info(f"{msg_prefix}: Training fold")
+
+        X_train, y_train = (  # pylint: disable=invalid-name
+            X.loc[train_idxs],
+            y.loc[train_idxs],
+        )  # pylint: disable=invalid-name
+        pipe.fit(X_train, y_train)
+
+        y_pred = pipe.predict_proba(X_train)
+
+        msg.info(
+            f"{msg_prefix}: AUC = {[round(roc_auc_score(y_train,probs), 3) for probs in y_pred]}"
+        )
+
+        preds = list(
+            zip(
+                [
+                    pipe.predict_proba(X.loc[val_idxs])[x][
+                        :,
+                        1,
+                    ]
+                    for x in range(0, len(y_pred))
+                ]
+            )
+        )
+
+        test = pd.concat(
+            [
+                train,
+                pd.DataFrame(
+                    {
+                        outcome: pred[0]
+                        for outcome, pred in zip(
+                            [f"y_hat_{x}" for x in outcome_col_name], preds
+                        )
+                    }
+                ),
+            ],
+            axis=1,
+        )
+
+    return (
+        create_eval_dataset(
+            col_names=cfg.data.col_name,
+            outcome_col_name=outcome_col_name,
+            df=train,
+        ),
+        test,
+    )
+
+
 def train_and_predict(
     cfg: FullConfigSchema,
     train: pd.DataFrame,
     val: pd.DataFrame,
     pipe: Pipeline,
-    outcome_col_name: str,
+    outcome_col_name: list[str],
     train_col_names: list[str],
     n_splits: Optional[int],
 ) -> EvalDataset:
@@ -204,6 +289,16 @@ def train_and_predict(
     log.good("Training model")
     if cfg.model.name in ("ebm", "xgboost"):
         pipe["model"].feature_names = train_col_names
+
+    if len(outcome_col_name) > 1:
+        eval_dataset, test = crossval_multilabel_and_predict(
+            cfg=cfg,
+            train=pd.concat([train, val], ignore_index=True),
+            pipe=pipe,
+            outcome_col_name=outcome_col_name,
+            train_col_names=train_col_names,
+            n_splits=n_splits,
+        )
 
     if n_splits is None:  # train on pre-defined splits
         eval_dataset = train_val_predict(

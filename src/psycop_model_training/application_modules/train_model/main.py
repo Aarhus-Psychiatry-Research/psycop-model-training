@@ -47,7 +47,7 @@ def post_wandb_setup_train_model(
     dataset = load_and_filter_train_and_val_from_cfg(cfg)
     pipe = create_post_split_pipeline(cfg)
     outcome_col_name, train_col_names = get_col_names(cfg, dataset.train)
-
+    outcome_col_name.remove("outcome_coercion_type_within_2_days")
     eval_dataset = train_and_predict(
         cfg=cfg,
         train=dataset.train,

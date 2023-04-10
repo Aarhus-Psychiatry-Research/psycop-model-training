@@ -22,25 +22,27 @@ def get_col_names(
         outcome_col_name: Name of the outcome column
         train_col_names: Names of the columns to use for training
     """
-    potential_outcome_col_names = [
-        c
-        for c in dataset.columns
-        if cfg.data.outc_prefix in c
-        and str(cfg.preprocessing.pre_split.min_lookahead_days) in c
+    # outcome_col_names = [
+    #     c
+    #     for c in dataset.columns
+    #     if cfg.data.outc_prefix in c
+    #     and str(cfg.preprocessing.pre_split.min_lookahead_days) in c
+    # ]
+    outcome_col_names = [  # pylint: disable=invalid-name
+        c for c in dataset.columns if c.startswith(cfg.data.outc_prefix) and str(cfg.preprocessing.pre_split.min_lookahead_days) in c
     ]
+    # if len(potential_outcome_col_names) != 1:
+    #     raise ValueError(
+    #         "More than one outcome column found. Please make outcome column names unambiguous.",
+    #     )
 
-    if len(potential_outcome_col_names) != 1:
-        raise ValueError(
-            "More than one outcome column found. Please make outcome column names unambiguous.",
-        )
-
-    outcome_col_name = potential_outcome_col_names[0]
+    # outcome_col_name = potential_outcome_col_names[0]
 
     train_col_names = [  # pylint: disable=invalid-name
         c for c in dataset.columns if c.startswith(cfg.data.pred_prefix)
     ]
 
-    return outcome_col_name, train_col_names
+    return outcome_col_names, train_col_names
 
 
 def infer_look_distance(
