@@ -72,14 +72,30 @@ def stratified_cross_validation(  # pylint: disable=too-many-locals
         )  # pylint: disable=invalid-name
         pipe.fit(X_train, y_train)
 
-        y_pred = pipe.predict_proba(X_train)[:, 1]
+        if pipe.named_steps.model.kwargs["num_class"] > 2:
+            y_pred = pipe.predict_proba(X_train)
 
-        msg.info(f"{msg_prefix}: AUC = {round(roc_auc_score(y_train,y_pred), 3)}")
+            msg.info(
+                f"{msg_prefix}: AUC = {round(roc_auc_score(y_train,y_pred, multi_class='ovo'), 3)}"
+            )
 
-        train_df.loc[val_idxs, "oof_y_hat"] = pipe.predict_proba(X.loc[val_idxs])[
-            :,
-            1,
-        ]
+            train_df.loc[
+                val_idxs,
+                [
+                    f"y_hat_{x}"
+                    for x in range(0, train_df[outcome_col_name].nunique(), 1)
+                ],
+            ] = pipe.predict_proba(X.loc[val_idxs])
+
+        else:
+            y_pred = pipe.predict_proba(X_train)[:, 1]
+
+            msg.info(f"{msg_prefix}: AUC = {round(roc_auc_score(y_train,y_pred), 3)}")
+
+            train_df.loc[val_idxs, "oof_y_hat"] = pipe.predict_proba(X.loc[val_idxs])[
+                :,
+                1,
+            ]
 
     return train_df
 
@@ -123,11 +139,22 @@ def crossval_train_and_predict(
 
     df = df.rename(columns={"oof_y_hat": "y_hat_prob"})
 
-    return create_eval_dataset(
-        col_names=cfg.data.col_name,
-        outcome_col_name=outcome_col_name,
-        df=df,
-    )
+    if pipe.named_steps.model.kwargs["num_class"] > 2:
+        return create_eval_dataset(
+            col_names=cfg.data.col_name,
+            outcome_col_name=outcome_col_name,
+            df=df,
+            additional_custom_columns=[
+                f"y_hat_{x}" for x in range(0, df[outcome_col_name].nunique(), 1)
+            ],
+        )
+
+    else:
+        return create_eval_dataset(
+            col_names=cfg.data.col_name,
+            outcome_col_name=outcome_col_name,
+            df=df,
+        )
 
 
 def train_val_predict(
