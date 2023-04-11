@@ -233,9 +233,10 @@ def crossval_multilabel_and_predict(
 
     return create_eval_dataset(
         col_names=cfg.data.col_name,
-        outcome_col_name=outcome_col_name,
+        outcome_col_name=outcome_col_name[0],
         df=train,
-        additional_custom_columns=[f"y_hat_{x}" for x in outcome_col_name],
+        additional_custom_columns=outcome_col_name
+        + [f"y_hat_{x}" for x in outcome_col_name],
     )
 
 
@@ -278,7 +279,7 @@ def train_and_predict(
             n_splits=n_splits,
         )
 
-    if n_splits is None:  # train on pre-defined splits
+    elif n_splits is None:  # train on pre-defined splits
         eval_dataset = train_val_predict(
             cfg=cfg,
             train=train,

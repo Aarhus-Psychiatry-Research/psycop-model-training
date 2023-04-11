@@ -87,14 +87,16 @@ class ModelEvaluator:
 
         if len(self.pipe.named_steps.model.classes_) > 1:
             roc_auc: float = roc_auc_score(
-                self.eval_ds.y,
+                np.asarray(
+                    [self.eval_ds.custom_columns[x] for x in self.outcome_col_name]
+                ).T,
                 np.asarray(
                     [
-                        self.eval_ds.custom_columns[f"y_hat_{x}"]
-                        for x in range(0, self.eval_ds.y.nunique(), 1)
-                    ],
+                        self.eval_ds.custom_columns[x]
+                        for x in list(self.eval_ds.custom_columns.keys())
+                        if x.startswith("y_hat")
+                    ]
                 ).T,
-                multi_class="ovo",
             )
 
         else:
