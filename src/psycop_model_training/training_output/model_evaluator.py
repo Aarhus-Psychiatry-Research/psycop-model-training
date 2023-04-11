@@ -95,7 +95,8 @@ class ModelEvaluator:
                         for x in range(0, self.eval_ds.y.nunique(), 1)
                     ],
                 ).T,
-                multi_class="ovo",
+                average="weighted",
+                multi_class="ovr",
             )
 
         else:
