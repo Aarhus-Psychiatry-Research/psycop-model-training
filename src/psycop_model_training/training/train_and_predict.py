@@ -221,43 +221,21 @@ def crossval_multilabel_and_predict(
         y_pred = pipe.predict_proba(X_train)
 
         msg.info(
-            f"{msg_prefix}: AUC = {[round(roc_auc_score(y_train,probs), 3) for probs in y_pred]}"
+            f"{msg_prefix}: AUC = {round(roc_auc_score(np.asarray([y_train[x] for x in y_train.columns]).T, np.asarray([y_pred[x][:,1] for x in range(0, len(y_pred))]).T), 3)}"
         )
 
-        preds = list(
-            zip(
-                [
-                    pipe.predict_proba(X.loc[val_idxs])[x][
-                        :,
-                        1,
-                    ]
-                    for x in range(0, len(y_pred))
-                ]
-            )
-        )
-
-        test = pd.concat(
+        train.loc[val_idxs, [f"y_hat_{x}" for x in outcome_col_name]] = np.asarray(
             [
-                train,
-                pd.DataFrame(
-                    {
-                        outcome: pred[0]
-                        for outcome, pred in zip(
-                            [f"y_hat_{x}" for x in outcome_col_name], preds
-                        )
-                    }
-                ),
-            ],
-            axis=1,
-        )
+                pipe.predict_proba(X.loc[val_idxs])[x][:, 1]
+                for x in range(0, len(y_pred))
+            ]
+        ).T
 
-    return (
-        create_eval_dataset(
-            col_names=cfg.data.col_name,
-            outcome_col_name=outcome_col_name,
-            df=train,
-        ),
-        test,
+    return create_eval_dataset(
+        col_names=cfg.data.col_name,
+        outcome_col_name=outcome_col_name,
+        df=train,
+        additional_custom_columns=[f"y_hat_{x}" for x in outcome_col_name],
     )
 
 
@@ -291,7 +269,7 @@ def train_and_predict(
         pipe["model"].feature_names = train_col_names
 
     if len(outcome_col_name) > 1:
-        eval_dataset, test = crossval_multilabel_and_predict(
+        eval_dataset = crossval_multilabel_and_predict(
             cfg=cfg,
             train=pd.concat([train, val], ignore_index=True),
             pipe=pipe,

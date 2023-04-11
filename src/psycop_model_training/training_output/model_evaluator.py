@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+import numpy as np
 
 # Set matplotlib backend to Agg to avoid errors when running on a server in parallel
 import pandas as pd
@@ -84,10 +85,23 @@ class ModelEvaluator:
             pipe_metadata=self.pipeline_metadata,
         )
 
-        roc_auc: float = roc_auc_score(  # type: ignore
-            self.eval_ds.y,
-            self.eval_ds.y_hat_probs,
-        )
+        if len(self.pipe.named_steps.model.classes_) > 1:
+            roc_auc: float = roc_auc_score(
+                self.eval_ds.y,
+                np.asarray(
+                    [
+                        self.eval_ds.custom_columns[f"y_hat_{x}"]
+                        for x in range(0, self.eval_ds.y.nunique(), 1)
+                    ],
+                ).T,
+                multi_class="ovo",
+            )
+
+        else:
+            roc_auc: float = roc_auc_score(  # type: ignore
+                self.eval_ds.y,
+                self.eval_ds.y_hat_probs,
+            )
 
         wandb.log(
             {
