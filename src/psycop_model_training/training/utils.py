@@ -1,5 +1,6 @@
 """Utility functions for model training."""
 from typing import Optional
+
 import pandas as pd
 from psycop_model_training.config_schemas.data import ColumnNamesSchema
 from psycop_model_training.training_output.dataclasses import EvalDataset
@@ -23,7 +24,7 @@ def create_eval_dataset(
 
     if additional_custom_columns is not None:
         custom_columns.update(
-            {col_name: df[col_name] for col_name in additional_custom_columns}
+            {col_name: df[col_name] for col_name in additional_custom_columns},
         )
 
     # Add all eval_ columns to custom_columns attribute

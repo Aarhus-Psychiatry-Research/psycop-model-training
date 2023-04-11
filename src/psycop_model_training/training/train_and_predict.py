@@ -76,7 +76,7 @@ def stratified_cross_validation(  # pylint: disable=too-many-locals
             y_pred = pipe.predict_proba(X_train)
 
             msg.info(
-                f"{msg_prefix}: AUC = {round(roc_auc_score(y_train,y_pred, multi_class='ovo'), 3)}"
+                f"{msg_prefix}: AUC = {round(roc_auc_score(y_train,y_pred, multi_class='ovo'), 3)}",
             )
 
             train_df.loc[

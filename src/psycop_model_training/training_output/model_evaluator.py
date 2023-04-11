@@ -1,5 +1,6 @@
 import logging
 from pathlib import Path
+
 import numpy as np
 
 # Set matplotlib backend to Agg to avoid errors when running on a server in parallel
@@ -92,7 +93,7 @@ class ModelEvaluator:
                     [
                         self.eval_ds.custom_columns[f"y_hat_{x}"]
                         for x in range(0, self.eval_ds.y.nunique(), 1)
-                    ]
+                    ],
                 ).T,
                 multi_class="ovo",
             )
