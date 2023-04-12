@@ -91,7 +91,7 @@ def load_and_filter_train_and_val_from_cfg(
         ),
         val=load_and_filter_split_from_cfg(
             pre_split_cfg=pre_split_cfg,
-            data_cfg=ata_cfg,
+            data_cfg=data_cfg,
             split="val",
         ),
     )
