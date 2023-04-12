@@ -79,12 +79,14 @@ def load_and_filter_train_from_cfg(
 
 
 @memory.cache
-def load_and_filter_train_and_val_from_cfg(data_cfg: DataSchema, pre_split_cfg: PreSplitPreprocessingConfigSchema) -> SplitDataset:
+def load_and_filter_train_and_val_from_cfg(
+    data_cfg: DataSchema, pre_split_cfg: PreSplitPreprocessingConfigSchema
+) -> SplitDataset:
     """Load train and validation data from file."""
     return SplitDataset(
         train=load_and_filter_split_from_cfg(
             pre_split_cfg=pre_split_cfg,
-            data_cfg=ata_cfg,
+            data_cfg=data_cfg,
             split="train",
         ),
         val=load_and_filter_split_from_cfg(
