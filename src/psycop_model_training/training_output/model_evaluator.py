@@ -14,6 +14,7 @@ from psycop_model_training.training_output.dataclasses import (
 )
 from psycop_model_training.utils.col_name_inference import get_col_names
 from psycop_model_training.utils.utils import (
+    PROJECT_ROOT,
     get_feature_importance_dict,
     get_selected_features_dict,
 )
@@ -102,5 +103,16 @@ class ModelEvaluator:
         logging.info(  # pylint: disable=logging-not-lazy,logging-fstring-interpolation
             f"ROC AUC: {roc_auc}",
         )
+
+        log = open(
+            PROJECT_ROOT.parent.parent
+            / "multirun"
+            / f"{self.cfg.project.wandb.group}.log",
+            "a",
+        )
+        log.write(
+            f"{roc_auc}: {self.cfg.model.args}, {self.cfg.preprocessing.pre_split}, {self.cfg.preprocessing.post_split} \n \n"
+        )
+        log.close()
 
         return roc_auc
