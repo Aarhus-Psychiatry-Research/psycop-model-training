@@ -1,0 +1,37 @@
+diff a/.github/workflows/tests.yml b/.github/workflows/tests.yml	(rejected hunks)
+@@ -48,21 +48,30 @@ jobs:
+       - name: Install dependencies
+         shell: bash
+         run: |
+-          python -m venv .venv
+-          source .venv/bin/activate
+-          python -m pip install --upgrade pip
++          python3 -m venv .venv
++          if [ "${{ matrix.os }}" == "windows-latest" ]; then
++            source .venv/Scripts/activate
++          else
++            source .venv/bin/activate
++          fi
++          python3 -m pip install --upgrade pip
+           pip install -e .[tests]
+ 
+       - name: Run and write pytest
+         shell: bash
+         run: |
+-          source .venv/bin/activate
++          # activate venv dependent on the os
++          if [ "${{ matrix.os }}" == "windows-latest" ]; then
++            source .venv/Scripts/activate
++          else
++            source .venv/bin/activate
++          fi
+           pytest --durations=0 -n 2 -x --junitxml=pytest.xml --cov-report=term-missing --cov=src/ tests/
+ 
+       - name: Test report on failures
+         uses: EnricoMi/publish-unit-test-result-action@v2
+         id: test_report_with_annotations
+-        if: ${{ github.actor != 'dependabot[bot]' && github.event_name == 'pull_request' && (success() || failure()) }} # Do not run for dependabot, run whether tests failed or succeeded
++        if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.9' &&  github.actor != 'dependabot[bot]' && github.event_name == 'pull_request' && (success() || failure()) }} # Do not run for dependabot, run whether tests failed or succeeded
+         with:
+           comment_mode: "failures"
+           files: |
