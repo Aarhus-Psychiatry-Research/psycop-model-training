@@ -2,6 +2,27 @@
 
 <!--next-version-placeholder-->
 
+## v0.55.0 (2023-04-24)
+### Feature
+* Parallel training to disk ([#492](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/issues/492)) ([`d7d1a66`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/d7d1a668af9d020e0a353817363179039854a6b3))
+* Save run performance to a shared parquet ([`87242c0`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/87242c008f12f63598d994be08fd948eae71b43a))
+* Allow offline training ([`5fde7bf`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/5fde7bf5ac0055e00b8cbd111acf814ef926aed2))
+
+## v0.54.1 (2023-04-19)
+### Fix
+* Misc. ([`331f57f`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/331f57fd178fc50eadb81a8777aed5c5cb3f4bf4))
+
+## v0.54.0 (2023-04-14)
+### Feature
+* Add pred time uuids to eval dataset ([#475](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/issues/475)) ([`8e27751`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/8e2775193074c8d48c92167b0cae94f02a5507fe))
+* Add pred_time_uuid to eval_dataset ([`7b942a0`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/7b942a00da5e62be8174c6bd599fb5e76f98f21b))
+
+### Fix
+* Exclude pred_time_uuid from model training ([`2ead608`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/2ead608282ea685d5a70c8e806a086c9cceded53))
+
+### Documentation
+* Missing args ([`19b0851`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/19b0851e2202a3698028d1f86ba2cee29f0d1e09))
+
 ## v0.53.0 (2023-04-12)
 ### Feature
 * Save config as json ([#483](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/issues/483)) ([`0be42a7`](https://github.com/Aarhus-Psychiatry-Research/psycop-model-training/commit/0be42a7cddaee8564e5dd66ed8bd688b8c522b6e))
