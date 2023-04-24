@@ -49,7 +49,10 @@ def post_wandb_setup_train_model(
     """Train a single model and evaluate it."""
     eval_dir_path = get_eval_dir(cfg)
 
-    dataset = load_and_filter_train_and_val_from_cfg(cfg)
+    dataset = load_and_filter_train_and_val_from_cfg(
+        data_cfg=cfg.data,
+        pre_split_cfg=cfg.preprocessing.pre_split,
+    )
     pipe = create_post_split_pipeline(cfg)
     outcome_col_name, train_col_names = get_col_names(cfg, dataset.train)
 
