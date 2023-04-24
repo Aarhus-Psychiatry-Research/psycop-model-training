@@ -19,7 +19,7 @@ from psycop_model_training.preprocessing.pre_split.processors.value_cleaner impo
 )
 
 # Create a temporary directory to cache the results
-cachedir = Path("E:/t2d/preprocessed_dataset_cache/")
+cachedir = Path("E:/shared_resources/cache")
 cachedir.mkdir(parents=True, exist_ok=True)
 memory = Memory(location=cachedir, verbose=1)
 
