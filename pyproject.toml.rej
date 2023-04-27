@@ -1,0 +1,10 @@
+diff a/pyproject.toml b/pyproject.toml	(rejected hunks)
+@@ -170,7 +170,7 @@ description: run unit tests
+ extras = tests
+ use_develop = true
+ commands =
+-  pytest -n auto
++  pytest -n auto {posargs:test}
+ 
+ [testenv:type]
+ description: run type checks
